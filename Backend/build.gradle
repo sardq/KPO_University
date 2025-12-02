@@ -54,3 +54,12 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+plugins {
+    id "org.sonarqube" version "7.1.0.6387"
+}
+sonar {
+  properties {
+    property "sonar.projectKey", "sardq_KPO_University"
+    property "sonar.organization", "sardq"
+  }
+}
