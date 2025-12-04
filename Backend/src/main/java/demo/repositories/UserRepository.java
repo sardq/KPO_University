@@ -15,6 +15,7 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>,
         PagingAndSortingRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByLogin(String login);
+
     Optional<UserEntity> findByEmail(String email);
 
     @NotNull

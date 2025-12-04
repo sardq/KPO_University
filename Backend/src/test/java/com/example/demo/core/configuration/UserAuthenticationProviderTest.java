@@ -6,6 +6,7 @@ import demo.core.configuration.PasswordConfig;
 import demo.core.configuration.RestExceptionHandler;
 import demo.core.configuration.UserAuthenticationEntryPoint;
 import demo.core.configuration.UserAuthenticationProvider;
+import demo.core.configuration.WebConfiguration;
 import demo.dto.ErrorDto;
 import demo.exceptions.AppException;
 import demo.models.UserEntity;
@@ -242,4 +243,14 @@ class UserAuthenticationProviderTest {
         assertEquals("Test error", response.getBody().getMessage());
     }
 
+    @Test
+    void testCustomCorsFilter() {
+        WebConfiguration config = new WebConfiguration();
+
+        var bean = config.customCorsFilter();
+
+        assertNotNull(bean);
+        assertEquals(-102, bean.getOrder());
+        assertNotNull(bean.getFilter());
+    }
 }
