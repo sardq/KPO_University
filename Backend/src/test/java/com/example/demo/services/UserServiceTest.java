@@ -1,5 +1,7 @@
 package com.example.demo.services;
 
+import demo.core.error.NotFoundException;
+import demo.dto.CredentialsDto;
 import demo.exceptions.AppException;
 import demo.models.UserEntity;
 import demo.repositories.UserRepository;
@@ -9,12 +11,16 @@ import demo.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 class UserServiceTest {
@@ -23,6 +29,8 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
     private UserService userService;
     private EmailService emailService;
+    @Mock
+    private Page<UserEntity> mockPage;
 
     @BeforeEach
     void setUp() {
@@ -122,4 +130,57 @@ class UserServiceTest {
                     }
                 }));
     }
+
+    @Test
+    void testGetAll() {
+        when(repository.findAll()).thenReturn(List.of(new UserEntity()));
+        List<UserEntity> result = userService.getAll();
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testGetAllWithPage() {
+        when(repository.findAll(PageRequest.of(0, 5))).thenReturn(mockPage);
+        Page<UserEntity> result = userService.getAll(0, 5);
+        assertEquals(mockPage, result);
+    }
+
+    @Test
+    void testGetByIdNotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> userService.get(1L));
+    }
+
+    @Test
+    void testGetByEmailInvalid() {
+        when(repository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> userService.getByEmail("test@example.com"));
+    }
+
+    @Test
+    void testCreateNullEntity() {
+        assertThrows(IllegalArgumentException.class, () -> userService.create(null));
+    }
+
+    @Test
+    void testLoginUnknownUser() {
+        CredentialsDto dto = new CredentialsDto();
+        dto.setLogin("unknown");
+        dto.setPassword("pass".toCharArray());
+        when(repository.findByLogin("unknown")).thenReturn(Optional.empty());
+        assertThrows(AppException.class, () -> userService.login(dto));
+    }
+
+    @Test
+    void testResetPasswordSuccess() {
+        UserEntity user = new UserEntity();
+        user.setEmail("user@example.com");
+        when(repository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded");
+
+        userService.resetPassword("user@example.com");
+        verify(repository).save(user);
+        verify(emailService).sendNewPassword(eq("user@example.com"), anyString());
+    }
+
 }
