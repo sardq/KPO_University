@@ -1,16 +1,17 @@
-package demo.Services;
+package demo.services;
 
-import demo.Core.Configuration.Constants;
-import demo.Core.Configuration.UserAuthenticationProvider;
-import demo.Core.Configuration.UserMapper;
-import demo.Core.Error.NotFoundException;
-import demo.DTO.CredentialsDto;
-import demo.DTO.UserDto;
-import demo.Exceptions.AppException;
-import demo.Models.UserEntity;
-import demo.Repositories.UserRepository;
+import demo.core.configuration.UserAuthenticationProvider;
+import demo.core.configuration.UserMapper;
+import demo.core.error.NotFoundException;
+import demo.dto.CredentialsDto;
+import demo.dto.UserDto;
+import demo.exceptions.AppException;
+import demo.models.UserEntity;
+import demo.repositories.UserRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.nio.CharBuffer;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -32,19 +34,26 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserAuthenticationProvider userAuthenticationProvider;
     private final EmailService emailService;
+    private final SecureRandom random = new SecureRandom();
+    private static final String LOG_RESPONSE = "Ответ: {}";
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    @Value("${app.default-password}")
+    private String defaultPassword;
+    private final UserService self;
 
     public UserService(UserRepository repository, PasswordEncoder passwordEncoder, UserMapper userMapper,
-            @Lazy UserAuthenticationProvider userAuthenticationProvider, EmailService emailService) {
+            @Lazy UserAuthenticationProvider userAuthenticationProvider, EmailService emailService,
+            @Lazy UserService self) {
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.repository = repository;
+        this.self = self;
         this.userAuthenticationProvider = userAuthenticationProvider;
         this.emailService = emailService;
     }
 
     private void checkEmail(Long id, String login) {
-        logger.info("Проверка существования пользователя: {}", id, login);
+        logger.info("Проверка существования пользователя: {} {}", id, login);
         final Optional<UserEntity> existsUser = repository.findByEmailIgnoreCase(login);
         if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
             logger.warn("Пользователь с такой почтой уже существует");
@@ -58,15 +67,15 @@ public class UserService {
         logger.info("Получение списка пользователей");
 
         var result = StreamSupport.stream(repository.findAll().spliterator(), false).toList();
-        logger.info("Ответ: {}", result);
+        logger.info(LOG_RESPONSE, result);
         return result;
     }
 
     @Transactional(readOnly = true)
     public Page<UserEntity> getAll(int page, int size) {
-        logger.info("Получение списка пользователей: {}", page, size);
+        logger.info("Получение списка пользователей: {}, {}", page, size);
         var result = repository.findAll(PageRequest.of(page, size));
-        logger.info("Ответ: {}", result);
+        logger.info(LOG_RESPONSE, result);
         return result;
     }
 
@@ -76,7 +85,7 @@ public class UserService {
         var result = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException(UserEntity.class, id));
 
-        logger.info("Ответ: {}", result);
+        logger.info(LOG_RESPONSE, result);
         return result;
 
     }
@@ -86,7 +95,7 @@ public class UserService {
         logger.info("Получение пользователя с помощью почты :{}", email);
         var result = repository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email"));
-        logger.info("Ответ: {}", result);
+        logger.info(LOG_RESPONSE, result);
         return result;
     }
 
@@ -94,14 +103,14 @@ public class UserService {
     public UserEntity create(UserEntity entity) {
         logger.info("Попытка создать пользователя: {}", entity);
         if (entity == null) {
-            logger.error("Отсутствует сущность", entity);
+            logger.error("Отсутствует сущность {}", entity);
             throw new IllegalArgumentException("Entity is null");
         }
         checkEmail(null, entity.getEmail());
         final String password = Optional.ofNullable(entity.getPassword()).orElse("");
         entity.setPassword(
                 passwordEncoder.encode(
-                        StringUtils.hasText(password.strip()) ? password : Constants.DEFAULT_PASSWORD));
+                        StringUtils.hasText(password.strip()) ? password : defaultPassword));
         entity.setRole(entity.getRole());
         var result = repository.save(entity);
         logger.info("Пользователь сохранен: {}", entity);
@@ -110,8 +119,8 @@ public class UserService {
 
     @Transactional
     public UserEntity update(long id, UserEntity entity) {
-        logger.info("Попытка обновить пользователя: {}", id, entity);
-        final UserEntity existsEntity = get(id);
+        logger.info("Попытка обновить пользователя: {} {}", id, entity);
+        final UserEntity existsEntity = self.get(id);
         checkEmail(id, entity.getEmail());
         existsEntity.setLogin(entity.getLogin());
         existsEntity.setEmail(entity.getEmail());
@@ -119,7 +128,7 @@ public class UserService {
             existsEntity.setPassword(
                     passwordEncoder.encode(
                             StringUtils.hasText(entity.getPassword().strip()) ? entity.getPassword()
-                                    : Constants.DEFAULT_PASSWORD));
+                                    : defaultPassword));
         repository.save(existsEntity);
         logger.info("Пользователь сохранен: {}", existsEntity);
         return existsEntity;
@@ -129,7 +138,7 @@ public class UserService {
     @Transactional
     public UserEntity delete(long id) {
         logger.info("Попытка удалить пользователя: {}", id);
-        final UserEntity existsEntity = get(id);
+        final UserEntity existsEntity = self.get(id);
         repository.delete(existsEntity);
         return existsEntity;
     }
@@ -164,7 +173,6 @@ public class UserService {
     private String generateRandomPassword(int length) {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
-        java.util.Random random = new java.util.Random();
 
         for (int i = 0; i < length; i++) {
             sb.append(chars.charAt(random.nextInt(chars.length())));

@@ -1,4 +1,4 @@
-package demo.Models;
+package demo.models;
 
 public enum UserRole {
     STUDENT,

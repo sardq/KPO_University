@@ -1,8 +1,8 @@
-package demo.Models;
+package demo.models;
 
 import java.util.Objects;
 
-import demo.Core.Models.BaseEntity;
+import demo.core.models.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

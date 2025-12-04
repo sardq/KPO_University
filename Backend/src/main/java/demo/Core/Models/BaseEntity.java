@@ -1,6 +1,6 @@
-package demo.Core.Models;
+package demo.core.models;
 
-import demo.Core.Configuration.Constants;
+import demo.core.configuration.Constants;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;

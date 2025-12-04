@@ -1,4 +1,4 @@
-package demo.Repositories;
+package demo.repositories;
 
 import java.util.Optional;
 
@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import demo.Models.UserEntity;
-import demo.Models.UserRole;
+import demo.models.UserEntity;
+import demo.models.UserRole;
 
 public interface UserRepository extends CrudRepository<UserEntity, Long>,
         PagingAndSortingRepository<UserEntity, Long> {
@@ -18,7 +18,7 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>,
     Optional<UserEntity> findByEmail(String email);
 
     @NotNull
-    Optional<UserEntity> findById(@NotNull Long Id);
+    Optional<UserEntity> findById(@NotNull Long id);
 
     Optional<UserEntity> findByEmailIgnoreCase(String email);
 

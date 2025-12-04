@@ -1,9 +1,9 @@
-package demo.Controllers;
+package demo.controllers;
 
-import demo.Core.Configuration.UserAuthenticationProvider;
-import demo.DTO.CredentialsDto;
-import demo.DTO.UserDto;
-import demo.Services.UserService;
+import demo.services.UserService;
+import demo.dto.CredentialsDto;
+import demo.dto.UserDto;
+import demo.core.configuration.UserAuthenticationProvider;
 import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
 import java.util.Map;
 
 @RestController
@@ -40,8 +39,14 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
-        logger.info("Запрос на восстановление пароля: " + email);
-        userService.resetPassword(email);
-        return ResponseEntity.ok("Новый пароль отправлен на почту");
+        logger.info("Запрос на восстановление пароля: email_hash={}", email != null ? email.hashCode() : "null");
+
+    if (email == null || email.isBlank()) {
+        return ResponseEntity.badRequest().body("Email is required");
+    }
+
+    userService.resetPassword(email);
+
+    return ResponseEntity.ok("Password reset instructions sent.");
     }
 }

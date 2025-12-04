@@ -1,14 +1,14 @@
 package demo;
 
-import demo.Models.UserEntity;
-import demo.Models.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import demo.Services.UserService;
+import demo.models.UserEntity;
+import demo.models.UserRole;
+import demo.services.UserService;
 
 import java.util.Objects;
 

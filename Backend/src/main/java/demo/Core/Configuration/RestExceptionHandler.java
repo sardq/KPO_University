@@ -1,7 +1,9 @@
-package demo.Core.Configuration;
+package demo.core.configuration;
 
-import demo.DTO.ErrorDto;
-import demo.Exceptions.AppException;
+import demo.dto.ErrorDto;
+import demo.exceptions.AppException;
+
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

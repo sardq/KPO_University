@@ -1,4 +1,4 @@
-package demo.Core.Error;
+package demo.core.error;
 
 public class NotFoundException extends RuntimeException {
     public <T> NotFoundException(Class<T> clazz, Long id) {

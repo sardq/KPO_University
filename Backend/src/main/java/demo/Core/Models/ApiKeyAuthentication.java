@@ -1,7 +1,8 @@
-package demo.Core.Models;
+package demo.core.models;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import java.util.Collections;
+import java.util.Objects;
 
 public class ApiKeyAuthentication extends AbstractAuthenticationToken {
 
@@ -22,4 +23,22 @@ public class ApiKeyAuthentication extends AbstractAuthenticationToken {
     public Object getPrincipal() {
         return "ApiKeyUser";
     }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ApiKeyAuthentication other)) {
+            return false;
+        }
+        return Objects.equals(getPrincipal(), other.getPrincipal())
+            && Objects.equals(getCredentials(), other.getCredentials())
+            && Objects.equals(getAuthorities(), other.getAuthorities());
+}
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPrincipal(), getCredentials(), getAuthorities());
+    }
+
 }

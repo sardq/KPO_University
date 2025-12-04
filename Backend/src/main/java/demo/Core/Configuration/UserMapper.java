@@ -1,7 +1,8 @@
-package demo.Core.Configuration;
+package demo.core.configuration;
 
-import demo.DTO.UserDto;
-import demo.Models.UserEntity;
+import demo.dto.UserDto;
+import demo.models.UserEntity;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

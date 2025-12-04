@@ -1,8 +1,8 @@
-package demo.Controllers;
+package demo.controllers;
 
-import demo.Services.EmailService;
-import demo.Services.OtpService;
-import demo.Core.Configuration.Constants;
+import demo.core.configuration.Constants;
+import demo.services.EmailService;
+import demo.services.OtpService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class OtpController {
 
     @PostMapping("/verify")
     public ResponseEntity<Map<String, String>> verifyOtp(@RequestBody Map<String, String> requestBody) {
-        logger.info("Запрос на подтверждение кода: {}", requestBody);
+        logger.info("Запрос на подтверждение кода");
         Map<String, String> response = new HashMap<>();
         String key = requestBody.get("key");
         String otp = requestBody.get("otp");
@@ -42,14 +42,15 @@ public class OtpController {
 
     @PostMapping(value = "/send/email", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> sendOtpEmail(@RequestBody Map<String, String> requestBody) {
-        logger.info("Запрос на отправку электронного письма: {}", requestBody);
         Map<String, String> response = new HashMap<>();
         String email = requestBody.get("email");
+        logger.info("Запрос на отправку электронного письма, email_hash={}",
+            email != null ? email.hashCode() : "null");
         try {
             String otp = otpService.generateOtp(email);
             emailService.sendOtp(email, otp);
             response.put("message", "Код отправлен на вашу почту. Пожалуйста проверьте почту.");
-            response.put("otp", otp.toString());
+            response.put("otp", otp);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("error", "Произошла ошибка при отправке кода.");

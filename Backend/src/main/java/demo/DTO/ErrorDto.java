@@ -1,4 +1,4 @@
-package demo.DTO;
+package demo.dto;
 
 public class ErrorDto {
     private String message;

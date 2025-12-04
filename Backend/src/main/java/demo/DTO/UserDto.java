@@ -1,4 +1,4 @@
-package demo.DTO;
+package demo.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
@@ -13,9 +13,6 @@ public class UserDto {
     private String lastName;
     @JsonProperty(access = Access.READ_ONLY)
     private String token;
-
-    public UserDto() {
-    }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public Long getId() {

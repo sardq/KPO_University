@@ -1,4 +1,4 @@
-package demo.Core.Configuration;
+package demo.core.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

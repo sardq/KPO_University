@@ -1,7 +1,8 @@
-package demo.Core.Configuration;
+package demo.core.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import demo.DTO.ErrorDto;
+
+import demo.dto.ErrorDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
