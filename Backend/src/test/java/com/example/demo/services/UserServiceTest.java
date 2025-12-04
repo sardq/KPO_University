@@ -1,9 +1,12 @@
 package com.example.demo.services;
 
+import demo.core.configuration.Constants;
+import demo.core.configuration.PasswordConfig;
 import demo.core.error.NotFoundException;
 import demo.dto.CredentialsDto;
 import demo.exceptions.AppException;
 import demo.models.UserEntity;
+import demo.models.UserRole;
 import demo.repositories.UserRepository;
 import demo.services.EmailService;
 import demo.services.UserService;
@@ -183,4 +186,79 @@ class UserServiceTest {
         verify(emailService).sendNewPassword(eq("user@example.com"), anyString());
     }
 
+    @Test
+    void testGetUserSuccess() {
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        user.setEmail("test@example.com");
+
+        when(repository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserEntity result = userService.get(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("test@example.com", result.getEmail());
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void testGetByEmailSuccess() {
+        UserEntity user = new UserEntity();
+        user.setEmail("test@example.com");
+
+        when(repository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(user));
+
+        UserEntity result = userService.getByEmail("test@example.com");
+
+        assertNotNull(result);
+        assertEquals("test@example.com", result.getEmail());
+        verify(repository).findByEmailIgnoreCase("test@example.com");
+    }
+
+    @Test
+    void testUpdateUser() {
+        UserEntity existingUser = new UserEntity();
+        existingUser.setId(1L);
+        existingUser.setEmail("old@example.com");
+
+        UserEntity updatedUser = new UserEntity();
+        updatedUser.setEmail("new@example.com");
+        updatedUser.setFirstName("John");
+
+        when(repository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(repository.save(any(UserEntity.class))).thenReturn(updatedUser);
+
+    }
+
+    @Test
+    void testGetAllUsersEmpty() {
+        when(repository.findAll()).thenReturn(List.of());
+
+        List<UserEntity> result = userService.getAll();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(repository).findAll();
+    }
+
+    @Test
+    void testConstants() {
+        assertEquals("/api/v1", Constants.API_URL);
+    }
+
+    @Test
+    void testUserRoleEnum() {
+        UserRole[] roles = UserRole.values();
+        assertTrue(roles.length > 0);
+
+        UserRole admin = UserRole.valueOf("ADMIN");
+        assertEquals(UserRole.ADMIN, admin);
+    }
+
+    @Test
+    void testPasswordConfig() {
+        PasswordConfig config = new PasswordConfig();
+        assertNotNull(config.passwordEncoder());
+    }
 }
