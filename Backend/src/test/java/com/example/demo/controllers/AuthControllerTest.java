@@ -54,4 +54,13 @@ class AuthControllerTest {
 
         assertEquals(200, response.getStatusCode().value());
     }
+
+    @Test
+    void testResetPasswordEmailNull() {
+        Map<String, String> request = Map.of();
+        ResponseEntity<String> response = authController.resetPassword(request);
+        assertEquals(400, response.getStatusCode().value());
+        assertEquals("Email is required", response.getBody());
+    }
+
 }

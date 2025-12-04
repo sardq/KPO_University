@@ -47,4 +47,16 @@ class OtpControllerTest {
 
         assertEquals("Sucess", response.getBody().get("status"));
     }
+
+    @Test
+    void testSendOtpEmailException() {
+        String email = "fail@example.com";
+        when(otpService.generateOtp(email)).thenThrow(new RuntimeException("Fail"));
+
+        ResponseEntity<Map<String, String>> response = otpController.sendOtpEmail(Map.of("email", email));
+
+        assertEquals(500, response.getStatusCode().value());
+        assertTrue(response.getBody().containsKey("error"));
+    }
+
 }

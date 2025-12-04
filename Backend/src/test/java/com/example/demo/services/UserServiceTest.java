@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import demo.exceptions.AppException;
 import demo.models.UserEntity;
 import demo.repositories.UserRepository;
 import demo.services.EmailService;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,6 +30,7 @@ class UserServiceTest {
         passwordEncoder = mock(PasswordEncoder.class);
         emailService = mock(EmailService.class);
         userService = new UserService(repository, passwordEncoder, null, null, emailService, null);
+        ReflectionTestUtils.setField(userService, "self", userService);
     }
 
     @Test
@@ -71,5 +74,52 @@ class UserServiceTest {
         when(repository.findByEmail(email)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> userService.resetPassword(email));
+    }
+
+    @Test
+    void testCreateUserNullEntity() {
+        assertThrows(IllegalArgumentException.class, () -> userService.create(null));
+    }
+
+    @Test
+    void testGetUserNotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(Exception.class, () -> userService.get(1L));
+    }
+
+    @Test
+    void testDeleteUser() {
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+
+        UserService spyService = spy(userService);
+        ReflectionTestUtils.setField(spyService, "self", spyService);
+
+        doReturn(user).when(spyService).get(1L);
+
+        doNothing().when(repository).delete(user);
+
+        UserEntity deleted = spyService.delete(1L);
+
+        assertEquals(user, deleted);
+        verify(repository).delete(user);
+    }
+
+    @Test
+    void testLoginInvalidPassword() {
+        UserEntity user = new UserEntity();
+        user.setLogin("user");
+        user.setPassword("encoded");
+
+        when(repository.findByLogin("user")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(any(), any())).thenReturn(false);
+
+        assertThrows(AppException.class, () -> userService.login(
+                new demo.dto.CredentialsDto() {
+                    {
+                        setLogin("user");
+                        setPassword("wrong".toCharArray());
+                    }
+                }));
     }
 }

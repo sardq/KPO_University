@@ -65,4 +65,11 @@ class UserAuthenticationProviderTest {
         assertNotNull(token2);
         assertNotEquals(token1, token2);
     }
+
+    @Test
+    void testValidateTokenExpiredOrMalformed() {
+        String token = provider.createToken("user@example.com") + "invalid";
+
+        assertThrows(Exception.class, () -> provider.validateToken(token));
+    }
 }

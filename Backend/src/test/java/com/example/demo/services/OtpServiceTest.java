@@ -36,4 +36,5 @@ class OtpServiceTest {
         boolean result = otpService.validateOtp("unknown@example.com", "123456");
         assertFalse(result);
     }
+
 }
