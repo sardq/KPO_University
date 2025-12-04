@@ -243,8 +243,21 @@ class UserServiceTest {
     }
 
     @Test
-    void testConstants() {
+    void testConstantsValues() {
         assertEquals("/api", Constants.API_URL);
+        assertEquals("hibernate_sequence", Constants.SEQUENCE_NAME);
+        assertEquals(5, Constants.DEFUALT_PAGE_SIZE);
+        assertEquals("redirect:", Constants.REDIRECT_VIEW);
+        assertEquals("/admin", Constants.ADMIN_PREFIX);
+        assertEquals("/login", Constants.LOGIN_URL);
+        assertEquals("/logout", Constants.LOGOUT_URL);
+    }
+
+    @Test
+    void testConstantsConstructorPrivate() {
+        assertThrows(Exception.class, () -> {
+            Constants.class.getDeclaredConstructor().newInstance();
+        });
     }
 
     @Test
