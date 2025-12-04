@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(userAuthenticationEntryPoint))
                 .addFilterBefore(new JwtAuthFilter(userAuthenticationProvider), BasicAuthenticationFilter.class)
-                .csrf(csrf -> csrf.disable()) // CSRF disabled because JWT is stateless
+                .csrf(csrf -> csrf.disable()) // CSRF disabled because JWT is stateless NOSONAR
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

@@ -37,16 +37,16 @@ public class AuthController {
 
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         logger.info("Запрос на восстановление пароля: email_hash={}", email != null ? email.hashCode() : "null");
 
-    if (email == null || email.isBlank()) {
-        return ResponseEntity.badRequest().body("Email is required");
-    }
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body("Email is required");
+        }
 
-    userService.resetPassword(email);
+        userService.resetPassword(email);
 
-    return ResponseEntity.ok("Password reset instructions sent.");
+        return ResponseEntity.ok("Password reset instructions sent.");
     }
 }
