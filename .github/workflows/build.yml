@@ -1,5 +1,4 @@
 name: SonarQube
-
 on:
   push:
     branches:
@@ -34,11 +33,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('backend/**/*.gradle') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('Backend/**/*.gradle', 'Backend/**/*.gradle.kts') }}
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build and analyze
-        working-directory: backend   # <-- ВАЖНО: запуск из папки backend!
+        working-directory: Backend
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build sonar --info
