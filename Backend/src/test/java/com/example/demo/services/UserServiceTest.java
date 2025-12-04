@@ -244,7 +244,7 @@ class UserServiceTest {
 
     @Test
     void testConstants() {
-        assertEquals("/api/v1", Constants.API_URL);
+        assertEquals("/api", Constants.API_URL);
     }
 
     @Test
