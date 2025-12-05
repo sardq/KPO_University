@@ -35,14 +35,14 @@ class UserAuthenticationProviderTest {
 
     private UserService userService;
     private UserAuthenticationProvider provider;
-    private final String TEST_SECRET_KEY = "test-secret-key-for-jwt-token-validation-test-secret-key";
+    private final String test_secret_key = "test-secret-key-for-jwt-token-validation-test-secret-key";
 
     @BeforeEach
     void setUp() {
         userService = mock(UserService.class);
         provider = new UserAuthenticationProvider(userService);
 
-        ReflectionTestUtils.setField(provider, "secretKey", TEST_SECRET_KEY);
+        ReflectionTestUtils.setField(provider, "secretKey", test_secret_key);
 
         provider.init();
     }

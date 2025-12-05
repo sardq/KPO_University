@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import demo.dto.ErrorDto;
 
-public class ErrorDtoTest {
+class ErrorDtoTest {
     @Test
     void testErrorDto() {
         ErrorDto dto = new ErrorDto("error");
