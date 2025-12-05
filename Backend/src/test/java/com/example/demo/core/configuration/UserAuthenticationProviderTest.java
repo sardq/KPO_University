@@ -55,7 +55,7 @@ class UserAuthenticationProviderTest {
 
         when(userService.getByEmail(login)).thenReturn(user);
 
-        String token = provider.createToken(login);
+        String token = provider.createToken(login, "STUDENT");
 
         assertNotNull(token);
         assertTrue(token.length() > 10);
@@ -79,8 +79,8 @@ class UserAuthenticationProviderTest {
 
         when(userService.getByEmail("user1@example.com")).thenReturn(user1);
 
-        String token1 = provider.createToken("user1@example.com");
-        String token2 = provider.createToken("user2@example.com");
+        String token1 = provider.createToken("user1@example.com", "STUDENT");
+        String token2 = provider.createToken("user2@example.com", "STUDENT");
 
         assertNotNull(token1);
         assertNotNull(token2);
@@ -95,7 +95,7 @@ class UserAuthenticationProviderTest {
 
         when(userService.getByEmail(login)).thenReturn(user);
 
-        String validToken = provider.createToken(login);
+        String validToken = provider.createToken(login, "STUDENT");
         String malformedToken = validToken + "invalid";
 
         assertThrows(Exception.class, () -> provider.validateToken(malformedToken));

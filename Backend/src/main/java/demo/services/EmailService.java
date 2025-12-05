@@ -25,6 +25,7 @@ public class EmailService {
         logger.info("Код отправлен");
         mailSender.send(message);
     }
+
     public void sendNewPassword(String to, String newPassword) {
         logger.info("Отправка нового пароля пользователю");
 
@@ -34,5 +35,28 @@ public class EmailService {
         message.setText("Ваш пароль: " + newPassword + "\n");
 
         mailSender.send(message);
+    }
+
+    public void sendPasswordEmail(String toEmail, String login, String password) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setSubject("Ваши учетные данные");
+
+            String text = String.format(
+                    "Здравствуйте!\n\n" +
+                            "Ваши учетные данные для входа в систему:\n\n" +
+                            "Логин: %s\n" +
+                            "Пароль: %s\n\n" +
+                            "С уважением,\n" +
+                            "Администрация системы",
+                    login, password);
+            message.setText(text);
+            mailSender.send(message);
+            logger.info("Пароль отправлен на почту: {}", toEmail);
+        } catch (Exception e) {
+            logger.error("Ошибка отправки email: {}", e.getMessage(), e);
+            throw new RuntimeException("Ошибка отправки email", e);
+        }
     }
 }

@@ -7,6 +7,8 @@ import demo.dto.CredentialsDto;
 import demo.dto.UserDto;
 import demo.exceptions.AppException;
 import demo.models.UserEntity;
+import org.springframework.data.domain.Pageable;
+import demo.models.UserRole;
 import demo.repositories.UserRepository;
 
 import org.slf4j.Logger;
@@ -19,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.nio.CharBuffer;
 import java.security.SecureRandom;
@@ -62,6 +63,16 @@ public class UserService {
         }
     }
 
+    private void checkLogin(Long id, String login) {
+        logger.info("Проверка логина: {} {}", id, login);
+        final Optional<UserEntity> existsUser = repository.findByLogin(login);
+        if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
+            logger.warn("Пользователь с таким логином уже существует");
+            throw new IllegalArgumentException(
+                    "Пользователь с таким логином уже существует " + login);
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<UserEntity> getAll() {
         logger.info("Получение списка пользователей");
@@ -99,6 +110,15 @@ public class UserService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public UserEntity getByLogin(String login) {
+        logger.info("Получение пользователя с помощью login :{}", login);
+        var result = repository.findByLoginIgnoreCase(login)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid login"));
+        logger.info(LOG_RESPONSE, result);
+        return result;
+    }
+
     @Transactional
     public UserEntity create(UserEntity entity) {
         logger.info("Попытка создать пользователя: {}", entity);
@@ -107,11 +127,15 @@ public class UserService {
             throw new IllegalArgumentException("Entity is null");
         }
         checkEmail(null, entity.getEmail());
-        final String password = Optional.ofNullable(entity.getPassword()).orElse("");
-        entity.setPassword(
-                passwordEncoder.encode(
-                        StringUtils.hasText(password.strip()) ? password : defaultPassword));
-        entity.setRole(entity.getRole());
+        // String generatedPassword = generateRandomPassword(10);
+        String generatedPassword = entity.getPassword();
+        entity.setPassword(passwordEncoder.encode(generatedPassword));
+        try {
+            emailService.sendPasswordEmail(entity.getEmail(), entity.getLogin(), generatedPassword);
+        } catch (Exception e) {
+            logger.error("Ошибка отправки пароля на почту: {}", e.getMessage());
+        }
+
         var result = repository.save(entity);
         logger.info("Пользователь сохранен: {}", entity);
         return result;
@@ -122,13 +146,19 @@ public class UserService {
         logger.info("Попытка обновить пользователя: {} {}", id, entity);
         final UserEntity existsEntity = self.get(id);
         checkEmail(id, entity.getEmail());
-        existsEntity.setLogin(entity.getLogin());
-        existsEntity.setEmail(entity.getEmail());
-        if ((entity.getPassword() != null) && (entity.getPassword().length() < 30))
-            existsEntity.setPassword(
-                    passwordEncoder.encode(
-                            StringUtils.hasText(entity.getPassword().strip()) ? entity.getPassword()
-                                    : defaultPassword));
+        if (!existsEntity.getEmail().equals(entity.getEmail())) {
+            checkEmail(id, entity.getEmail());
+            existsEntity.setEmail(entity.getEmail());
+        }
+
+        if (!existsEntity.getLogin().equals(entity.getLogin())) {
+            checkLogin(id, entity.getLogin());
+            existsEntity.setLogin(entity.getLogin());
+        }
+
+        existsEntity.setFirstName(entity.getFirstName());
+        existsEntity.setLastName(entity.getLastName());
+        existsEntity.setRole(entity.getRole());
         repository.save(existsEntity);
         logger.info("Пользователь сохранен: {}", existsEntity);
         return existsEntity;
@@ -147,15 +177,31 @@ public class UserService {
         logger.info("Попытка входа: {}", credentialsDto);
         UserEntity user = repository.findByLogin(credentialsDto.getLogin())
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-        if (passwordEncoder.matches(CharBuffer.wrap(credentialsDto.getPassword()), user.getPassword())) {
-            logger.info("Пользователь вошел: {}", user);
-            String token = userAuthenticationProvider.createToken(user.getEmail());
-            var userDto = userMapper.toUserDto(user);
-            userDto.setToken(token);
-            return userDto;
-
+        boolean passwordMatches = passwordEncoder.matches(
+                CharBuffer.wrap(credentialsDto.getPassword()),
+                user.getPassword());
+        if (!passwordMatches) {
+            logger.warn("Неверный пароль для пользователя: {}", credentialsDto.getLogin());
+            throw new AppException("Неверный логин или пароль", HttpStatus.BAD_REQUEST);
         }
-        throw new AppException("Invalid password", HttpStatus.BAD_REQUEST);
+
+        logger.info("Успешный вход пользователя: {} (роль: {})",
+                user.getEmail(), user.getRole());
+
+        String userRole = user.getRole() != null ? user.getRole().name() : UserRole.STUDENT.name();
+        String token = userAuthenticationProvider.createToken(
+                user.getEmail(),
+                userRole);
+
+        UserDto userDto = userMapper.toUserDto(user);
+
+        userDto.setToken(token);
+        userDto.setRole(userRole);
+
+        logger.debug("Создан токен для пользователя: {}, роль в DTO: {}",
+                user.getEmail(), userDto.getRole());
+
+        return userDto;
     }
 
     public void resetPassword(String email) {
@@ -179,5 +225,36 @@ public class UserService {
         }
 
         return sb.toString();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserEntity> getAllByFilters(String search, String roleStr, int page, int size) {
+        logger.info("Фильтрация пользователей: search='{}', role={}, page={}, size={}",
+                search, roleStr, page, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+        UserRole role = null;
+
+        if (roleStr != null && !roleStr.isEmpty()) {
+            try {
+                role = UserRole.valueOf(roleStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+            }
+        }
+
+        Page<UserEntity> result;
+
+        if (role != null && search != null && !search.isEmpty()) {
+            result = repository.searchByTextAndRole(search, role, pageable);
+        } else if (role != null) {
+            result = repository.findByRole(role, pageable);
+        } else if (search != null && !search.isEmpty()) {
+            result = repository.searchByText(search, pageable);
+        } else {
+            result = repository.findAll(pageable);
+        }
+
+        logger.info(LOG_RESPONSE, result);
+        return result;
     }
 }
