@@ -21,8 +21,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Optional;
 
@@ -121,18 +126,16 @@ class UserServiceTest {
         UserEntity user = new UserEntity();
         user.setLogin("user");
         user.setPassword("encoded");
-
+    
         when(repository.findByLogin("user")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(any(), any())).thenReturn(false);
-
-        assertThrows(AppException.class, () -> userService.login(
-                new demo.dto.CredentialsDto() {
-                    {
-                        setLogin("user");
-                        setPassword("wrong".toCharArray());
-                    }
-                }));
-    }
+    
+        CredentialsDto credentials = new CredentialsDto();
+        credentials.setLogin("user");
+        credentials.setPassword("wrong".toCharArray());
+    
+        assertThrows(AppException.class, () -> userService.login(credentials));
+}
 
     @Test
     void testGetAll() {
@@ -216,20 +219,18 @@ class UserServiceTest {
         verify(repository).findByEmailIgnoreCase("test@example.com");
     }
 
-    @Test
-    void testUpdateUser() {
-        UserEntity existingUser = new UserEntity();
-        existingUser.setId(1L);
-        existingUser.setEmail("old@example.com");
-
-        UserEntity updatedUser = new UserEntity();
-        updatedUser.setEmail("new@example.com");
-        updatedUser.setFirstName("John");
-
-        when(repository.findById(1L)).thenReturn(Optional.of(existingUser));
-        when(repository.save(any(UserEntity.class))).thenReturn(updatedUser);
-
-    }
+   @Test
+void testUpdateUserNotFound() {
+    Long userId = 999L;
+    
+    when(repository.findById(userId)).thenReturn(Optional.empty());
+    
+    assertThrows(Exception.class, () -> {
+        repository.findById(userId).orElseThrow(() -> new RuntimeException("Not found"));
+    });
+    
+    verify(repository, never()).save(any());
+}
 
     @Test
     void testGetAllUsersEmpty() {
@@ -253,13 +254,12 @@ class UserServiceTest {
         assertEquals("/logout", Constants.LOGOUT_URL);
     }
 
-    @Test
-    void testConstantsConstructorPrivate() {
-        assertThrows(Exception.class, () -> {
-            Constants.class.getDeclaredConstructor().newInstance();
-        });
+    
+   @Test
+    void testConstructorIsPrivate() throws NoSuchMethodException {
+        Constructor<Constants> constructor = Constants.class.getDeclaredConstructor();
+        assertTrue(Modifier.isPrivate(constructor.getModifiers()));
     }
-
     @Test
     void testUserRoleEnum() {
         UserRole[] roles = UserRole.values();

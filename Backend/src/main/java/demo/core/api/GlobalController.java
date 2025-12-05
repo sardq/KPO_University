@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class GlobalController {
     @ModelAttribute("servletPath")
-    String getRequestServletPath(HttpServletRequest request) {
+    public String getRequestServletPath(HttpServletRequest request) {
         return request.getServletPath();
     }
 
