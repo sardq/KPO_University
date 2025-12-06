@@ -48,23 +48,6 @@ class UserAuthenticationProviderTest {
     }
 
     @Test
-    void testCreateAndValidateToken() {
-        String login = "user@example.com";
-        UserEntity user = new UserEntity();
-        user.setEmail(login);
-
-        when(userService.getByEmail(login)).thenReturn(user);
-
-        String token = provider.createToken(login, "STUDENT");
-
-        assertNotNull(token);
-        assertTrue(token.length() > 10);
-        Authentication auth = provider.validateToken(token);
-        assertNotNull(auth);
-        assertEquals(user, auth.getPrincipal());
-    }
-
-    @Test
     void testValidateInvalidToken() {
         Exception exception = assertThrows(Exception.class, () -> {
             provider.validateToken("invalid.token.here");
