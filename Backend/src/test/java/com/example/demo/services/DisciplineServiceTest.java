@@ -1,0 +1,314 @@
+package com.example.demo.services;
+
+import demo.core.error.NotFoundException;
+import demo.models.DisciplineEntity;
+import demo.models.GroupEntity;
+import demo.repositories.DisciplineRepository;
+import demo.repositories.GroupRepository;
+import demo.services.DisciplineService;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class DisciplineServiceTest {
+
+    @Mock
+    private DisciplineRepository disciplineRepository;
+
+    @Mock
+    private GroupRepository groupRepository;
+
+    @InjectMocks
+    private DisciplineService disciplineService;
+
+    private DisciplineEntity testDiscipline;
+    private GroupEntity testGroup;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(disciplineService, "self", disciplineService);
+
+        testDiscipline = new DisciplineEntity("Mathematics");
+        testDiscipline.setId(1L);
+
+        testGroup = new GroupEntity("Group A");
+        testGroup.setId(1L);
+    }
+
+    @Test
+    void getAll_ShouldReturnPageOfDisciplines() {
+        int page = 0;
+        int size = 10;
+        List<DisciplineEntity> disciplines = Arrays.asList(
+                new DisciplineEntity("Math"),
+                new DisciplineEntity("Physics"));
+        disciplines.get(0).setId(1L);
+        disciplines.get(1).setId(2L);
+
+        Page<DisciplineEntity> expectedPage = new PageImpl<>(disciplines);
+        when(disciplineRepository.findAll(any(PageRequest.class))).thenReturn(expectedPage);
+
+        Page<DisciplineEntity> result = disciplineService.getAll(page, size);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        verify(disciplineRepository).findAll(PageRequest.of(page, size));
+    }
+
+    @Test
+    void get_WithExistingId_ShouldReturnDiscipline() {
+        Long disciplineId = 1L;
+        when(disciplineRepository.findByIdWithGroups(disciplineId))
+                .thenReturn(Optional.of(testDiscipline));
+
+        DisciplineEntity result = disciplineService.get(disciplineId);
+
+        assertNotNull(result);
+        assertEquals(disciplineId, result.getId());
+        verify(disciplineRepository).findByIdWithGroups(disciplineId);
+    }
+
+    @Test
+    void get_WithNonExistingId_ShouldThrowNotFoundException() {
+        Long disciplineId = 999L;
+        when(disciplineRepository.findByIdWithGroups(disciplineId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> disciplineService.get(disciplineId));
+        verify(disciplineRepository).findByIdWithGroups(disciplineId);
+    }
+
+    @Test
+    void create_WithUniqueName_ShouldCreateDiscipline() {
+        DisciplineEntity newDiscipline = new DisciplineEntity("Chemistry");
+        when(disciplineRepository.findByName("Chemistry")).thenReturn(Optional.empty());
+        when(disciplineRepository.save(newDiscipline)).thenAnswer(invocation -> {
+            DisciplineEntity saved = invocation.getArgument(0);
+            saved.setId(3L);
+            return saved;
+        });
+
+        DisciplineEntity result = disciplineService.create(newDiscipline);
+
+        assertNotNull(result);
+        assertEquals(3L, result.getId());
+        assertEquals("Chemistry", result.getName());
+        verify(disciplineRepository).findByName("Chemistry");
+        verify(disciplineRepository).save(newDiscipline);
+    }
+
+    @Test
+    void create_WithExistingName_ShouldThrowIllegalArgumentException() {
+        when(disciplineRepository.findByName("Mathematics"))
+                .thenReturn(Optional.of(testDiscipline));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> disciplineService.create(new DisciplineEntity("Mathematics")));
+
+        assertTrue(exception.getMessage().contains("уже существует"));
+        verify(disciplineRepository).findByName("Mathematics");
+        verify(disciplineRepository, never()).save(any());
+    }
+
+    @Test
+    void update_WithValidData_ShouldUpdateDiscipline() {
+        Long disciplineId = 1L;
+        DisciplineEntity existingDiscipline = new DisciplineEntity("Old Name");
+        existingDiscipline.setId(disciplineId);
+
+        DisciplineEntity updateData = new DisciplineEntity("New Name");
+        updateData.setGroups(new HashSet<>());
+
+        when(disciplineRepository.findByIdWithGroups(disciplineId))
+                .thenReturn(Optional.of(existingDiscipline));
+        when(disciplineRepository.findByName("New Name")).thenReturn(Optional.empty());
+        when(disciplineRepository.save(any(DisciplineEntity.class))).thenReturn(existingDiscipline);
+
+        DisciplineEntity result = disciplineService.update(disciplineId, updateData);
+
+        assertNotNull(result);
+        assertEquals("New Name", result.getName());
+        verify(disciplineRepository).findByIdWithGroups(disciplineId);
+        verify(disciplineRepository).findByName("New Name");
+        verify(disciplineRepository).save(existingDiscipline);
+    }
+
+    @Test
+    void delete_WithExistingDiscipline_ShouldDeleteDiscipline() {
+        Long disciplineId = 1L;
+        when(disciplineRepository.findByIdWithGroups(disciplineId))
+                .thenReturn(Optional.of(testDiscipline));
+
+        DisciplineEntity result = disciplineService.delete(disciplineId);
+
+        assertNotNull(result);
+        assertEquals(disciplineId, result.getId());
+        verify(disciplineRepository).findByIdWithGroups(disciplineId);
+        verify(disciplineRepository).delete(testDiscipline);
+    }
+
+    @Test
+    void addGroup_WithValidIds_ShouldAddGroupToDiscipline() {
+        Long disciplineId = 1L;
+        Long groupId = 100L;
+
+        Set<GroupEntity> groups = new HashSet<>();
+        testDiscipline.setGroups(groups);
+
+        Set<DisciplineEntity> disciplines = new HashSet<>();
+        testGroup.setDisciplines(disciplines);
+
+        when(disciplineRepository.findByIdWithGroups(disciplineId))
+                .thenReturn(Optional.of(testDiscipline));
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(testGroup));
+        when(disciplineRepository.save(testDiscipline)).thenReturn(testDiscipline);
+        when(groupRepository.save(testGroup)).thenReturn(testGroup);
+
+        DisciplineEntity result = disciplineService.addGroup(disciplineId, groupId);
+
+        assertNotNull(result);
+        assertTrue(result.getGroups().contains(testGroup));
+        assertTrue(testGroup.getDisciplines().contains(testDiscipline));
+        verify(disciplineRepository).findByIdWithGroups(disciplineId);
+        verify(groupRepository).findById(groupId);
+        verify(disciplineRepository).save(testDiscipline);
+        verify(groupRepository).save(testGroup);
+    }
+
+    @Test
+    void removeGroup_WithExistingGroup_ShouldRemoveGroupFromDiscipline() {
+        Long disciplineId = 1L;
+        Long groupId = 100L;
+
+        Set<GroupEntity> groups = new HashSet<>();
+        groups.add(testGroup);
+        testDiscipline.setGroups(groups);
+
+        Set<DisciplineEntity> disciplines = new HashSet<>();
+        disciplines.add(testDiscipline);
+        testGroup.setDisciplines(disciplines);
+
+        when(disciplineRepository.findByIdWithGroups(disciplineId))
+                .thenReturn(Optional.of(testDiscipline));
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(testGroup));
+        when(disciplineRepository.save(testDiscipline)).thenReturn(testDiscipline);
+
+        DisciplineEntity result = disciplineService.removeGroup(disciplineId, groupId);
+
+        assertNotNull(result);
+        assertFalse(result.getGroups().contains(testGroup));
+        verify(disciplineRepository).findByIdWithGroups(disciplineId);
+        verify(groupRepository).findById(groupId);
+        verify(disciplineRepository).save(testDiscipline);
+        verify(groupRepository, never()).save(any());
+    }
+
+    @Test
+    void removeGroup_WithNonExistingGroupInDiscipline_ShouldNotSave() {
+        Long disciplineId = 1L;
+        Long groupId = 999L;
+
+        testDiscipline.setGroups(new HashSet<>());
+
+        when(disciplineRepository.findByIdWithGroups(disciplineId))
+                .thenReturn(Optional.of(testDiscipline));
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(testGroup));
+
+        DisciplineEntity result = disciplineService.removeGroup(disciplineId, groupId);
+
+        assertNotNull(result);
+        verify(disciplineRepository).findByIdWithGroups(disciplineId);
+        verify(groupRepository).findById(groupId);
+        verify(disciplineRepository, never()).save(any());
+        verify(groupRepository, never()).save(any());
+    }
+
+    @Test
+    void getAllByFilters_WithoutFilters_ShouldReturnAll() {
+        int page = 0;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DisciplineEntity> expectedPage = new PageImpl<>(Collections.singletonList(testDiscipline));
+
+        when(disciplineRepository.findAll(pageable)).thenReturn(expectedPage);
+
+        Page<DisciplineEntity> result = disciplineService.getAllByFilters(null, null, page, size);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(disciplineRepository).findAll(pageable);
+        verify(disciplineRepository, never()).searchByText(any(), any());
+        verify(disciplineRepository, never()).searchAndFilter(any(), any(), any());
+    }
+
+    @Test
+    void getAllByFilters_WithEmptySearch_ShouldReturnAll() {
+        int page = 0;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DisciplineEntity> expectedPage = new PageImpl<>(Collections.singletonList(testDiscipline));
+
+        when(disciplineRepository.findAll(pageable)).thenReturn(expectedPage);
+
+        Page<DisciplineEntity> result = disciplineService.getAllByFilters("", null, page, size);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(disciplineRepository).findAll(pageable);
+        verify(disciplineRepository, never()).searchByText(any(), any());
+    }
+
+    @Test
+    void addGroup_WithNonExistingGroup_ShouldThrowNotFoundException() {
+        Long disciplineId = 1L;
+        Long groupId = 999L;
+
+        when(disciplineRepository.findByIdWithGroups(disciplineId))
+                .thenReturn(Optional.of(testDiscipline));
+        when(groupRepository.findById(groupId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> disciplineService.addGroup(disciplineId, groupId));
+
+        verify(groupRepository).findById(groupId);
+        verify(disciplineRepository, never()).save(any());
+        verify(groupRepository, never()).save(any());
+    }
+
+    @Test
+    void update_WithDuplicateNameFromDifferentEntity_ShouldThrowException() {
+        Long disciplineId = 1L;
+        DisciplineEntity existingDiscipline = new DisciplineEntity("Original");
+        existingDiscipline.setId(disciplineId);
+
+        DisciplineEntity otherDiscipline = new DisciplineEntity("Taken");
+        otherDiscipline.setId(2L);
+
+        DisciplineEntity updateData = new DisciplineEntity("Taken");
+
+        when(disciplineRepository.findByIdWithGroups(disciplineId))
+                .thenReturn(Optional.of(existingDiscipline));
+        when(disciplineRepository.findByName("Taken")).thenReturn(Optional.of(otherDiscipline));
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> disciplineService.update(disciplineId, updateData));
+
+        verify(disciplineRepository).findByName("Taken");
+        verify(disciplineRepository, never()).save(any());
+    }
+
+}
