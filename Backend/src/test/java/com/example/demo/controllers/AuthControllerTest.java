@@ -4,6 +4,7 @@ import demo.controllers.AuthController;
 import demo.core.configuration.UserAuthenticationProvider;
 import demo.dto.CredentialsDto;
 import demo.dto.UserDto;
+import demo.models.UserRole;
 import demo.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,10 +36,11 @@ class AuthControllerTest {
 
         UserDto userDto = new UserDto();
         userDto.setLogin("user");
+        userDto.setRole(UserRole.STUDENT.toString());
         userDto.setEmail("user@example.com");
 
         when(userService.login(dto)).thenReturn(userDto);
-        when(authProvider.createToken("user")).thenReturn("token");
+        when(authProvider.createToken("user", "STUDENT")).thenReturn("token");
 
         ResponseEntity<UserDto> response = authController.login(dto);
 

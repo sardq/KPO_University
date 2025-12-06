@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -126,16 +127,16 @@ class UserServiceTest {
         UserEntity user = new UserEntity();
         user.setLogin("user");
         user.setPassword("encoded");
-    
+
         when(repository.findByLogin("user")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(any(), any())).thenReturn(false);
-    
+
         CredentialsDto credentials = new CredentialsDto();
         credentials.setLogin("user");
         credentials.setPassword("wrong".toCharArray());
-    
+
         assertThrows(AppException.class, () -> userService.login(credentials));
-}
+    }
 
     @Test
     void testGetAll() {
@@ -219,18 +220,18 @@ class UserServiceTest {
         verify(repository).findByEmailIgnoreCase("test@example.com");
     }
 
-   @Test
-void testUpdateUserNotFound() {
-    Long userId = 999L;
-    
-    when(repository.findById(userId)).thenReturn(Optional.empty());
-    
-    assertThrows(Exception.class, () -> {
-        repository.findById(userId).orElseThrow(() -> new RuntimeException("Not found"));
-    });
-    
-    verify(repository, never()).save(any());
-}
+    @Test
+    void testUpdateUserNotFound() {
+        Long userId = 999L;
+
+        when(repository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(Exception.class, () -> {
+            repository.findById(userId).orElseThrow(() -> new RuntimeException("Not found"));
+        });
+
+        verify(repository, never()).save(any());
+    }
 
     @Test
     void testGetAllUsersEmpty() {
@@ -254,12 +255,12 @@ void testUpdateUserNotFound() {
         assertEquals("/logout", Constants.LOGOUT_URL);
     }
 
-    
-   @Test
+    @Test
     void testConstructorIsPrivate() throws NoSuchMethodException {
         Constructor<Constants> constructor = Constants.class.getDeclaredConstructor();
         assertTrue(Modifier.isPrivate(constructor.getModifiers()));
     }
+
     @Test
     void testUserRoleEnum() {
         UserRole[] roles = UserRole.values();
@@ -273,5 +274,47 @@ void testUpdateUserNotFound() {
     void testPasswordConfig() {
         PasswordConfig config = new PasswordConfig();
         assertNotNull(config.passwordEncoder());
+    }
+
+    @Test
+    void testGetAllByFilters_withSearchAndRole() {
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        Page<UserEntity> page = new PageImpl<>(List.of(user));
+
+        when(repository.searchByTextAndRole(
+                eq("searchText"),
+                eq(UserRole.ADMIN),
+                argThat(pageable -> pageable.getPageNumber() == 0 && pageable.getPageSize() == 5))).thenReturn(page);
+
+        Page<UserEntity> result = userService.getAllByFilters("searchText", "ADMIN", 0, 5);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        verify(repository).searchByTextAndRole(
+                eq("searchText"),
+                eq(UserRole.ADMIN),
+                argThat(pageable -> pageable.getPageNumber() == 0 && pageable.getPageSize() == 5));
+    }
+
+    @Test
+    void getAllByFilters_withRoleAndSearch_shouldCallCorrectRepositoryMethod() {
+        UserEntity user = new UserEntity();
+        user.setId(1L);
+        Page<UserEntity> page = new PageImpl<>(List.of(user));
+
+        when(repository.searchByTextAndRole(
+                eq("test"),
+                eq(UserRole.STUDENT),
+                argThat(p -> p.getPageNumber() == 0 && p.getPageSize() == 10))).thenReturn(page);
+
+        Page<UserEntity> result = userService.getAllByFilters("test", "STUDENT", 0, 10);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        verify(repository).searchByTextAndRole(
+                eq("test"),
+                eq(UserRole.STUDENT),
+                argThat(p -> p.getPageNumber() == 0 && p.getPageSize() == 10));
     }
 }

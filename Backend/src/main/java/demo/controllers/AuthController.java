@@ -31,7 +31,7 @@ public class AuthController {
     public ResponseEntity<UserDto> login(@RequestBody @Valid CredentialsDto credentialsDto) {
         logger.info("Запрос на вход");
         UserDto userDto = userService.login(credentialsDto);
-        userDto.setToken(userAuthenticationProvider.createToken(userDto.getLogin()));
+        userDto.setToken(userAuthenticationProvider.createToken(userDto.getLogin(), userDto.getRole()));
         return ResponseEntity.ok(userDto);
     }
 

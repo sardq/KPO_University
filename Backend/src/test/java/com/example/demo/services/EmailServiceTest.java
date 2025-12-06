@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import demo.exceptions.EmailSendException;
 import demo.services.EmailService;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,5 +53,18 @@ class EmailServiceTest {
         assertEquals(email, message.getTo()[0]);
         assertEquals("Восстановление пароля", message.getSubject());
         assertTrue(message.getText().contains(newPassword));
+    }
+
+    @Test
+    void testSendPasswordEmail_Success() {
+        assertDoesNotThrow(() -> emailService.sendPasswordEmail("test@example.com", "login", "password"));
+        verify(mailSender).send(any(SimpleMailMessage.class));
+    }
+
+    @Test
+    void testSendPasswordEmail_Exception() {
+        doThrow(new RuntimeException("SMTP error")).when(mailSender).send(any(SimpleMailMessage.class));
+        assertThrows(EmailSendException.class,
+                () -> emailService.sendPasswordEmail("test@example.com", "login", "password"));
     }
 }

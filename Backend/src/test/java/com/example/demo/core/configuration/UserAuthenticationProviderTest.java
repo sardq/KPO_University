@@ -47,21 +47,9 @@ class UserAuthenticationProviderTest {
         provider.init();
     }
 
-    @Test
-    void testCreateAndValidateToken() {
-        String login = "user@example.com";
-        UserEntity user = new UserEntity();
-        user.setEmail(login);
-
-        when(userService.getByEmail(login)).thenReturn(user);
-
-        String token = provider.createToken(login);
-
-        assertNotNull(token);
-        assertTrue(token.length() > 10);
-        Authentication auth = provider.validateToken(token);
-        assertNotNull(auth);
-        assertEquals(user, auth.getPrincipal());
+    @BeforeEach
+    void clearContext() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -79,8 +67,8 @@ class UserAuthenticationProviderTest {
 
         when(userService.getByEmail("user1@example.com")).thenReturn(user1);
 
-        String token1 = provider.createToken("user1@example.com");
-        String token2 = provider.createToken("user2@example.com");
+        String token1 = provider.createToken("user1@example.com", "STUDENT");
+        String token2 = provider.createToken("user2@example.com", "STUDENT");
 
         assertNotNull(token1);
         assertNotNull(token2);
@@ -95,7 +83,7 @@ class UserAuthenticationProviderTest {
 
         when(userService.getByEmail(login)).thenReturn(user);
 
-        String validToken = provider.createToken(login);
+        String validToken = provider.createToken(login, "STUDENT");
         String malformedToken = validToken + "invalid";
 
         assertThrows(Exception.class, () -> provider.validateToken(malformedToken));

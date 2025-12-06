@@ -1,7 +1,6 @@
 import './App.css';
 import logo from '../logo.svg';
-import React, { useState, useEffect  } from 'react';
-import { BrowserRouter as Router, useNavigate  } from 'react-router-dom';
+import React, { useState  } from 'react';
 
 import AppContent from './AppContent';
 import Header from './Header';

@@ -19,8 +19,6 @@ public class UserEntity extends BaseEntity {
     @Size(min = 5, max = 30)
     @Email
     private String email;
-    @Column(nullable = false)
-    @Size(min = 5)
     private String password;
     @Column(nullable = false)
     @Size(min = 1, max = 20)
