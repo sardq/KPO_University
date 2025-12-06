@@ -47,6 +47,11 @@ class UserAuthenticationProviderTest {
         provider.init();
     }
 
+    @BeforeEach
+    void clearContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void testValidateInvalidToken() {
         Exception exception = assertThrows(Exception.class, () -> {
