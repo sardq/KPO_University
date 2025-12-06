@@ -30,7 +30,7 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class UserService {
-    private final UserRepository repository;
+    public final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final UserAuthenticationProvider userAuthenticationProvider;

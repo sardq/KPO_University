@@ -22,11 +22,11 @@ import java.security.NoSuchAlgorithmException;
 @Service
 public class LogService {
 
-    private final MinioClient minioClient;
+    public final MinioClient minioClient;
     private static final Logger logger = LoggerFactory.getLogger(LogService.class);
 
     @Value("${minio.bucket}")
-    private String bucketName;
+        public String bucketName;
 
     public LogService(
             @Value("${minio.url}") String url,
