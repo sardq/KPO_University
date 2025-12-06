@@ -1,4 +1,4 @@
-import {useEffect, useContext} from "react";
+import {useContext} from "react";
 import OtpInput from "./EmailOTP";
 import { AuthContent } from './AuthContent';
 import { request } from '../helpers/axios_helper';
@@ -9,17 +9,12 @@ const EmailAuth = () => {
 
     const { email, setEmail, setCheckedAdmin } = useContext(AuthContent);
     const navigate = useNavigate();
-
-   useEffect(() => {
-    console.log("Компонент EmailAuth был загружен");
-  }, []);
   const onOtpSubmit = (otp) => {
         request(
             "POST",
             "/api/otp/verify",
             { key: email, otp: otp }
         ).then(response => {
-            console.log("OTP verified successfully", response.data);
             if(response.data.status === "Sucess")
             {
                 setEmail(null);
