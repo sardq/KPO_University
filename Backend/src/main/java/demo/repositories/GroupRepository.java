@@ -1,5 +1,6 @@
 package demo.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.validation.constraints.NotNull;
@@ -38,5 +39,22 @@ public interface GroupRepository extends CrudRepository<GroupEntity, Long>,
             @Param("text") String text,
             @Param("disciplineId") Long disciplineId,
             Pageable pageable);
+
+    @Query("""
+            SELECT g FROM GroupEntity g
+            JOIN g.disciplines d
+            WHERE d.id = :disciplineId
+            """)
+    List<GroupEntity> findByDisciplineId(@Param("disciplineId") Long disciplineId);
+
+    @Query("""
+            SELECT g FROM GroupEntity g
+            JOIN g.disciplines d
+            WHERE d.id = :disciplineId
+            """)
+    Page<GroupEntity> findByDisciplineId(@Param("disciplineId") Long disciplineId, Pageable pageable);
+
+    @Query("SELECT g FROM GroupEntity g LEFT JOIN FETCH g.students WHERE g.id = :groupId")
+    Optional<GroupEntity> findByIdWithStudents(@Param("groupId") Long groupId);
 
 }

@@ -1,44 +1,50 @@
 package demo.core.configuration;
 
+import demo.dto.DisciplineDto;
+import demo.models.DisciplineEntity;
+import demo.repositories.GroupRepository;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
-
-import demo.dto.DisciplineDto;
-import demo.models.DisciplineEntity;
-import demo.models.GroupEntity;
-
 @Component
 public class DisciplineMapper {
-
-    private final ModelMapper modelMapper;
-
-    public DisciplineMapper(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
+    
+    private final GroupRepository groupRepository;
+    
+    public DisciplineMapper(GroupRepository groupRepository) {
+        this.groupRepository = groupRepository;
     }
-
+    
     public DisciplineDto toDto(DisciplineEntity entity) {
-        if (entity == null)
+        if (entity == null) {
             return null;
-
-        DisciplineDto dto = modelMapper.map(entity, DisciplineDto.class);
-
-        if (entity.getGroups() != null) {
-            List<Long> groupIds = entity.getGroups().stream()
-                    .map(GroupEntity::getId)
-                    .collect(Collectors.toList());
-            dto.setGroupIds(groupIds);
-            dto.setGroupsCount(groupIds.size());
-        } else {
-            dto.setGroupsCount(0);
         }
-
+        
+        DisciplineDto dto = new DisciplineDto();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        
+        List<Long> groupIds = groupRepository.findByDisciplineId(entity.getId())
+                .stream()
+                .map(group -> group.getId())
+                .collect(Collectors.toList());
+        dto.setGroupIds(groupIds);
+        dto.setGroupsCount(groupIds.size());
+        
         return dto;
     }
-
+    
     public DisciplineEntity toEntity(DisciplineDto dto) {
-        return modelMapper.map(dto, DisciplineEntity.class);
+        if (dto == null) {
+            return null;
+        }
+        
+        DisciplineEntity entity = new DisciplineEntity();
+        entity.setId(dto.getId());
+        entity.setName(dto.getName());
+        
+        return entity;
     }
 }

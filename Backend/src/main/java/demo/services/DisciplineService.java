@@ -43,7 +43,7 @@ public class DisciplineService {
     @Transactional(readOnly = true)
     public DisciplineEntity get(Long id) {
         logger.info("Получение дисциплины {}", id);
-        var result = repository.findById(id)
+        var result = repository.findByIdWithGroups(id)
                 .orElseThrow(() -> new NotFoundException(DisciplineEntity.class, id));
         logger.info(LOG_RESPONSE, result);
         return result;
@@ -96,6 +96,8 @@ public class DisciplineService {
 
         discipline.getGroups().add(group);
         repository.save(discipline);
+        group.getDisciplines().add(discipline);
+        groupRepository.save(group);
 
         logger.info("Группа добавлена к дисциплине");
         return discipline;
@@ -106,9 +108,13 @@ public class DisciplineService {
         logger.info("Удаление группы {} из дисциплины {}", groupId, disciplineId);
 
         DisciplineEntity discipline = self.get(disciplineId);
-        boolean removed = discipline.getGroups().removeIf(g -> g.getId().equals(groupId));
+        GroupEntity group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NotFoundException(GroupEntity.class, groupId));
 
-        if (removed) {
+        boolean removedFromDiscipline = discipline.getGroups().remove(group);
+        boolean removedFromGroup = group.getDisciplines().remove(discipline);
+
+        if (removedFromDiscipline || removedFromGroup) {
             repository.save(discipline);
             logger.info("Группа удалена из дисциплины");
         } else {

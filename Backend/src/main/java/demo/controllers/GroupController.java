@@ -52,6 +52,13 @@ public class GroupController {
         return result.map(this::toDto);
     }
 
+    @GetMapping("/{id}")
+    public GroupDto getById(@PathVariable Long id) {
+        logger.info("Запрос на получение группы: {}", id);
+        GroupEntity groupEntity = service.get(id);
+        return modelMapper.toDto(groupEntity);
+    }
+
     @GetMapping
     public List<GroupDto> getAll(
             @RequestParam(defaultValue = "0") int page) {

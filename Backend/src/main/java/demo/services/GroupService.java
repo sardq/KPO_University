@@ -56,7 +56,7 @@ public class GroupService {
     @Transactional(readOnly = true)
     public GroupEntity get(Long id) {
         logger.info("Получение группы: {}", id);
-        var result = repository.findById(id)
+        var result = repository.findByIdWithStudents(id)
                 .orElseThrow(() -> new NotFoundException(GroupEntity.class, id));
         logger.info(LOG_RESPONSE, result);
         return result;

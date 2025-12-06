@@ -1,5 +1,6 @@
 package demo.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +31,7 @@ public interface DisciplineRepository extends CrudRepository<DisciplineEntity, L
 
     @Query("""
             SELECT d FROM DisciplineEntity d
-            LEFT JOIN d.groups g
+            LEFT JOIN FETCH d.groups g
             WHERE (:groupId IS NULL OR g.id = :groupId)
               AND LOWER(d.name) LIKE LOWER(CONCAT('%', :text, '%'))
             """)
@@ -38,4 +39,25 @@ public interface DisciplineRepository extends CrudRepository<DisciplineEntity, L
             @Param("text") String text,
             @Param("groupId") Long groupId,
             Pageable pageable);
+
+    @Query("""
+            SELECT d FROM DisciplineEntity d
+            JOIN d.groups g
+            WHERE g.id = :groupId
+            """)
+    List<DisciplineEntity> findByGroupId(@Param("groupId") Long groupId);
+
+    @Query("""
+            SELECT d FROM DisciplineEntity d
+            JOIN d.groups g
+            WHERE g.id = :groupId
+            """)
+    Page<DisciplineEntity> findByGroupId(@Param("groupId") Long groupId, Pageable pageable);
+
+    @Query("""
+                SELECT d FROM DisciplineEntity d
+                LEFT JOIN FETCH d.groups
+                WHERE d.id = :id
+            """)
+    Optional<DisciplineEntity> findByIdWithGroups(@Param("id") Long id);
 }
