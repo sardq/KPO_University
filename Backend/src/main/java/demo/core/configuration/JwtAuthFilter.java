@@ -39,7 +39,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     }
                 } catch (RuntimeException e) {
                     SecurityContextHolder.clearContext();
-                    System.out.println("JWT validation failed for: " + request.getRequestURI());
                 }
             }
         }

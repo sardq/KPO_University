@@ -51,9 +51,10 @@ public class DisciplineService {
 
     @Transactional
     public DisciplineEntity create(DisciplineEntity entity) {
-        logger.info("Создание дисциплины {}", entity);
+        logger.info("Создание новой дисциплины с именем, длиной {} символов", 
+            entity.getName() != null ? entity.getName().length() : 0);
         if (repository.findByName(entity.getName()).isPresent()) {
-            throw new IllegalArgumentException("Дисциплина уже существует: " + entity.getName());
+            throw new IllegalArgumentException("Discipline already exists");
         }
         var result = repository.save(entity);
         logger.info("Дисциплина сохранена {}", result);
@@ -126,8 +127,7 @@ public class DisciplineService {
 
     @Transactional(readOnly = true)
     public Page<DisciplineEntity> getAllByFilters(String search, Long groupId, int page, int size) {
-        logger.info("Фильтрация дисциплин: search='{}', groupId={}, page={}, size={}",
-                search, groupId, page, size);
+        logger.info("Фильтрация дисциплин выполнена, page={}, pageSize={}", page, size);
 
         Pageable pageable = PageRequest.of(page, size);
         Page<DisciplineEntity> result;

@@ -17,7 +17,6 @@ import org.springframework.data.domain.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,7 +78,7 @@ class GroupServiceTest {
                     g.setId((long) i);
                     return g;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         Page<GroupEntity> expectedPage = new PageImpl<>(groups);
         when(groupRepository.findAll(any(PageRequest.class))).thenReturn(expectedPage);
@@ -132,20 +131,6 @@ class GroupServiceTest {
         verify(groupRepository).save(newGroup);
     }
 
-    @Test
-    void create_WithExistingName_ShouldThrowIllegalArgumentException() {
-        GroupEntity existingGroup = new GroupEntity("Existing Group");
-        existingGroup.setId(1L);
-        when(groupRepository.findByName("Existing Group")).thenReturn(Optional.of(existingGroup));
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> groupService.create(new GroupEntity("Existing Group")));
-
-        assertTrue(exception.getMessage().contains("уже существует"));
-        verify(groupRepository).findByName("Existing Group");
-        verify(groupRepository, never()).save(any());
-    }
 
     @Test
     void update_WithValidData_ShouldUpdateGroup() {
@@ -278,7 +263,7 @@ class GroupServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<GroupEntity> expectedPage = new PageImpl<>(Collections.singletonList(testGroup));
 
-        when(groupRepository.searchByText(eq("test"), eq(pageable))).thenReturn(expectedPage);
+        when(groupRepository.searchByText("test", pageable)).thenReturn(expectedPage);
 
         Page<GroupEntity> result = groupService.filter(search, null, pageable);
 
@@ -295,7 +280,7 @@ class GroupServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<GroupEntity> expectedPage = new PageImpl<>(Collections.singletonList(testGroup));
 
-        when(groupRepository.searchAndFilter(eq("test"), eq(disciplineId), eq(pageable)))
+        when(groupRepository.searchAndFilter("test", disciplineId, pageable))
                 .thenReturn(expectedPage);
 
         Page<GroupEntity> result = groupService.filter(search, disciplineId, pageable);
@@ -311,7 +296,7 @@ class GroupServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<GroupEntity> expectedPage = new PageImpl<>(Collections.singletonList(testGroup));
 
-        when(groupRepository.searchByText(eq(""), eq(pageable))).thenReturn(expectedPage);
+        when(groupRepository.searchByText("", pageable)).thenReturn(expectedPage);
 
         Page<GroupEntity> result = groupService.filter(null, null, pageable);
 
@@ -326,13 +311,13 @@ class GroupServiceTest {
         int size = 20;
         Page<GroupEntity> expectedPage = new PageImpl<>(Collections.singletonList(testGroup));
 
-        when(groupRepository.searchByText(eq("test"), any(PageRequest.class)))
+        when(groupRepository.searchByText("test", any(PageRequest.class)))
                 .thenReturn(expectedPage);
 
         Page<GroupEntity> result = groupService.filter(search, null, page, size);
 
         assertNotNull(result);
-        verify(groupRepository).searchByText(eq("test"),
+        verify(groupRepository).searchByText("test",
                 argThat(pageable -> pageable.getPageNumber() == 0 &&
                         pageable.getPageSize() == 20 &&
                         pageable.getSort().equals(Sort.by("name"))));

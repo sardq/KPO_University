@@ -44,9 +44,7 @@ public class SecurityConfig {
                                 "/api/otp/**")
 
                         .permitAll()
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
-                        .requestMatchers("/api/disciplines/**").hasRole("ADMIN")
-                        .requestMatchers("/api/groups/**").hasRole("ADMIN")
+                        .requestMatchers("/api/disciplines/**","/api/groups/**" ,"/api/users").hasRole("ADMIN")
                         .requestMatchers("/api/user/me").authenticated()
                         .anyRequest().authenticated());
         return http.build();

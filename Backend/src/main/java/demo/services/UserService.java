@@ -54,24 +54,22 @@ public class UserService {
     }
 
     private void checkEmail(Long id, String login) {
-        logger.info("Проверка существования пользователя: {} {}", id, login);
-        final Optional<UserEntity> existsUser = repository.findByEmailIgnoreCase(login);
-        if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
-            logger.warn("Пользователь с такой почтой уже существует");
-            throw new IllegalArgumentException(
-                    "Пользователь с такой почтой уже существует " + login);
-        }
+    logger.info("Проверка существования пользователя: id={}", id); 
+    final Optional<UserEntity> existsUser = repository.findByEmailIgnoreCase(login);
+    if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
+        logger.warn("Пользователь с такой почтой уже существует"); 
+        throw new IllegalArgumentException("Пользователь с такой почтой уже существует");
     }
+}
 
-    private void checkLogin(Long id, String login) {
-        logger.info("Проверка логина: {} {}", id, login);
-        final Optional<UserEntity> existsUser = repository.findByLogin(login);
-        if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
-            logger.warn("Пользователь с таким логином уже существует");
-            throw new IllegalArgumentException(
-                    "Пользователь с таким логином уже существует " + login);
-        }
+private void checkLogin(Long id, String login) {
+    logger.info("Проверка логина: id={}", id); 
+    final Optional<UserEntity> existsUser = repository.findByLogin(login);
+    if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
+        logger.warn("Пользователь с таким логином уже существует"); 
+        throw new IllegalArgumentException("Пользователь с таким логином уже существует");
     }
+}
 
     @Transactional(readOnly = true)
     public List<UserEntity> getAll() {
@@ -127,8 +125,7 @@ public class UserService {
             throw new IllegalArgumentException("Entity is null");
         }
         checkEmail(null, entity.getEmail());
-        // String generatedPassword = generateRandomPassword(10);
-        String generatedPassword = entity.getPassword();
+        String generatedPassword = generateRandomPassword(10);
         entity.setPassword(passwordEncoder.encode(generatedPassword));
         try {
             emailService.sendPasswordEmail(entity.getEmail(), entity.getLogin(), generatedPassword);
@@ -181,7 +178,7 @@ public class UserService {
                 CharBuffer.wrap(credentialsDto.getPassword()),
                 user.getPassword());
         if (!passwordMatches) {
-            logger.warn("Неверный пароль для пользователя: {}", credentialsDto.getLogin());
+            logger.warn("Неверный пароль для пользователя");
             throw new AppException("Неверный логин или пароль", HttpStatus.BAD_REQUEST);
         }
 
@@ -229,17 +226,13 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserEntity> getAllByFilters(String search, String roleStr, int page, int size) {
-        logger.info("Фильтрация пользователей: search='{}', role={}, page={}, size={}",
-                search, roleStr, page, size);
+        logger.info("Фильтрация пользователей: page={}, size={}", page, size);
 
         Pageable pageable = PageRequest.of(page, size);
         UserRole role = null;
 
         if (roleStr != null && !roleStr.isEmpty()) {
-            try {
-                role = UserRole.valueOf(roleStr.toUpperCase());
-            } catch (IllegalArgumentException e) {
-            }
+            role = UserRole.valueOf(roleStr.toUpperCase());
         }
 
         Page<UserEntity> result;

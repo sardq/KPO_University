@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(DisciplineController.URL)
@@ -39,7 +38,7 @@ public class DisciplineController {
         return result.getContent()
                 .stream()
                 .map(modelMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @GetMapping("/filter")
@@ -48,8 +47,7 @@ public class DisciplineController {
             @RequestParam(name = "groupId", required = false) Long groupId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int pageSize) {
-        logger.info("Запрос на фильтрацию дисциплин: search={}, groupId={}, page={}, pageSize={}",
-                search, groupId, page, pageSize);
+        logger.info("Фильтрация дисциплин выполнена, page={}, pageSize={}", page, pageSize);
 
         Page<DisciplineEntity> result = service.getAllByFilters(search, groupId, page, pageSize);
         return result.map(modelMapper::toDto);

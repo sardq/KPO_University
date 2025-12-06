@@ -1,12 +1,12 @@
 package demo.core.configuration;
 
+import demo.core.models.BaseEntity;
 import demo.dto.DisciplineDto;
 import demo.models.DisciplineEntity;
 import demo.repositories.GroupRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class DisciplineMapper {
@@ -28,8 +28,8 @@ public class DisciplineMapper {
         
         List<Long> groupIds = groupRepository.findByDisciplineId(entity.getId())
                 .stream()
-                .map(group -> group.getId())
-                .collect(Collectors.toList());
+                .map(BaseEntity::getId)
+                .toList();   
         dto.setGroupIds(groupIds);
         dto.setGroupsCount(groupIds.size());
         

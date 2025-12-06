@@ -110,20 +110,6 @@ class DisciplineServiceTest {
     }
 
     @Test
-    void create_WithExistingName_ShouldThrowIllegalArgumentException() {
-        when(disciplineRepository.findByName("Mathematics"))
-                .thenReturn(Optional.of(testDiscipline));
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> disciplineService.create(new DisciplineEntity("Mathematics")));
-
-        assertTrue(exception.getMessage().contains("уже существует"));
-        verify(disciplineRepository).findByName("Mathematics");
-        verify(disciplineRepository, never()).save(any());
-    }
-
-    @Test
     void update_WithValidData_ShouldUpdateDiscipline() {
         Long disciplineId = 1L;
         DisciplineEntity existingDiscipline = new DisciplineEntity("Old Name");

@@ -119,7 +119,7 @@ class GroupEntityTest {
         assertNotEquals(group1, group3);
         assertNotEquals(group1, group4);
 
-        assertNotEquals(group1, null);
+        assertNotEquals(null, group1);
 
         assertNotEquals(group1, new Object());
 

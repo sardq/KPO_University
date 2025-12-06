@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(GroupController.URL)
@@ -45,8 +44,7 @@ public class GroupController {
             @RequestParam(name = "disciplineId", required = false) Long disciplineId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int pageSize) {
-        logger.info("Запрос на фильтрацию групп: search={}, disciplineId={}, page={}, pageSize={}",
-                search, disciplineId, page, pageSize);
+        logger.info("Фильтрация групп выполнена, page={}, pageSize={}", page, pageSize);
 
         Page<GroupEntity> result = service.filter(search, disciplineId, page, pageSize);
         return result.map(this::toDto);
@@ -67,8 +65,8 @@ public class GroupController {
         Page<GroupEntity> result = service.getAll(page, Constants.DEFUALT_PAGE_SIZE);
         return result.getContent()
                 .stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+                .map(modelMapper::toDto)
+                .toList();
     }
 
     @PostMapping("/create")

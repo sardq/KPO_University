@@ -126,7 +126,7 @@ class DisciplineEntityTest {
         assertNotEquals(discipline1, discipline3);
         assertNotEquals(discipline1, discipline4);
 
-        assertNotEquals(discipline1, null);
+        assertNotEquals(null, discipline1);
 
         assertNotEquals(discipline1, new Object());
 

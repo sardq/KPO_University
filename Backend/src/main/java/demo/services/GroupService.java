@@ -5,6 +5,7 @@ import demo.models.GroupEntity;
 import demo.models.UserEntity;
 import demo.repositories.GroupRepository;
 import demo.repositories.UserRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -27,7 +28,6 @@ public class GroupService {
     private final GroupRepository repository;
     private final UserRepository userRepository;
     private final GroupService self;
-
     public GroupService(GroupRepository repository,
             UserRepository userRepository,
             @Lazy GroupService self) {
@@ -64,7 +64,8 @@ public class GroupService {
 
     @Transactional
     public GroupEntity create(GroupEntity entity) {
-        logger.info("Попытка создать группу: {}", entity);
+         logger.info("Создание новой группы с именем, длиной {} символов", 
+            entity.getName() != null ? entity.getName().length() : 0);
         if (repository.findByName(entity.getName()).isPresent()) {
             throw new IllegalArgumentException("Группа уже существует: " + entity.getName());
         }
@@ -132,8 +133,6 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public Page<GroupEntity> filter(String search, Long disciplineId, Pageable pageable) {
-        logger.info("Фильтрация групп: search='{}', disciplineId={}, {}",
-                search, disciplineId, pageable);
 
         var searchText = Optional.ofNullable(search).orElse("");
 
@@ -151,7 +150,8 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public Page<GroupEntity> filter(String search, Long disciplineId, int page, int size) {
+        logger.info("Фильтрация дисциплин выполнена, page={}, pageSize={}", page, size);
         var pageable = PageRequest.of(page, size, default_sort);
-        return filter(search, disciplineId, pageable);
+        return self.filter(search, disciplineId, pageable);
     }
 }

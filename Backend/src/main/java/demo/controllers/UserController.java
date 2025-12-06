@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(UserController.URL)
@@ -34,8 +33,7 @@ public class UserController {
     }
 
     private UserDto toDto(UserEntity entity) {
-        UserDto dto = modelMapper.map(entity, UserDto.class);
-        return dto;
+        return modelMapper.map(entity, UserDto.class);
     }
 
     private UserEntity toEntity(UserDto dto) {
@@ -51,7 +49,7 @@ public class UserController {
         return result.getContent()
                 .stream()
                 .map(this::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @GetMapping("/filter")
@@ -60,8 +58,7 @@ public class UserController {
             @RequestParam(name = "role", defaultValue = "") String role,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int pageSize) {
-        logger.info("Запрос на фильтрацию пользователей: search={}, role={}, page={}, pageSize={}",
-                search, role, page, pageSize);
+        logger.info("Фильтрация пользователей выполнена, page={}, pageSize={}", page, pageSize);
 
         Page<UserEntity> result = userService.getAllByFilters(search, role, page, pageSize);
         return result.map(this::toDto);
@@ -78,7 +75,7 @@ public class UserController {
     public UserDto create(@RequestBody @Valid UserDto dto) {
         logger.info("Запрос на создание пользователя: {}", dto);
         UserEntity entity = toEntity(dto);
-        // entity.setPassword("");
+        entity.setPassword("");
         return toDto(userService.create(entity));
     }
 
@@ -104,9 +101,7 @@ public class UserController {
 
         Object principal = authentication.getPrincipal();
 
-        if (principal instanceof UserEntity) {
-            UserEntity user = (UserEntity) principal;
-
+        if (principal instanceof UserEntity user) {
             UserDto dto = new UserDto();
             dto.setId(user.getId());
             dto.setEmail(user.getEmail());

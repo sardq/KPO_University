@@ -1,5 +1,6 @@
 package demo.core.configuration;
 
+import demo.core.models.BaseEntity;
 import demo.dto.GroupDto;
 import demo.models.GroupEntity;
 import demo.repositories.UserRepository;
@@ -7,7 +8,6 @@ import demo.repositories.DisciplineRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class GroupMapper {
@@ -31,15 +31,15 @@ public class GroupMapper {
         
         List<Long> studentIds = userRepository.findByGroupId(entity.getId())
                 .stream()
-                .map(user -> user.getId())
-                .collect(Collectors.toList());
+                .map(BaseEntity::getId)
+                .toList();
         dto.setStudentIds(studentIds);
         dto.setStudentsCount(studentIds.size());
         
         List<Long> disciplineIds = disciplineRepository.findByGroupId(entity.getId())
                 .stream()
-                .map(discipline -> discipline.getId())
-                .collect(Collectors.toList());
+                .map(BaseEntity::getId)
+                .toList();
         dto.setDisciplineIds(disciplineIds);
         
         return dto;

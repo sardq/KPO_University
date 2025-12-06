@@ -5,6 +5,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+
+import demo.exceptions.InvalidJwtTokenException;
 import demo.models.UserEntity;
 import demo.services.UserService;
 import jakarta.annotation.PostConstruct;
@@ -71,8 +73,7 @@ public class UserAuthenticationProvider {
             return new UsernamePasswordAuthenticationToken(user, token, authorities);
 
         } catch (JWTVerificationException e) {
-            System.err.println("Invalid JWT token: " + e.getMessage());
-            throw new RuntimeException("Invalid JWT token", e);
+            throw new InvalidJwtTokenException("Invalid JWT token", e);
         }
     }
 

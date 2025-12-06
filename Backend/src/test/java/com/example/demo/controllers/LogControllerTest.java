@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class LogControllerTest {
+class LogControllerTest {
 
     @Mock
     private LogService logService;

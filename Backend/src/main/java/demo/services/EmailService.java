@@ -6,6 +6,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import demo.exceptions.EmailSendException;
+
 @Service
 public class EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
@@ -43,20 +45,22 @@ public class EmailService {
             message.setTo(toEmail);
             message.setSubject("Ваши учетные данные");
 
-            String text = String.format(
-                    "Здравствуйте!\n\n" +
-                            "Ваши учетные данные для входа в систему:\n\n" +
-                            "Логин: %s\n" +
-                            "Пароль: %s\n\n" +
-                            "С уважением,\n" +
-                            "Администрация системы",
-                    login, password);
+            String text = String.format("""
+            Здравствуйте!
+
+            Ваши учетные данные для входа в систему:
+
+            Логин: %s
+            Пароль: %s
+
+            С уважением,
+            Администрация системы
+            """, login, password);
             message.setText(text);
             mailSender.send(message);
-            logger.info("Пароль отправлен на почту: {}", toEmail);
+            logger.info("Пароль отправлен на почту");
         } catch (Exception e) {
-            logger.error("Ошибка отправки email: {}", e.getMessage(), e);
-            throw new RuntimeException("Ошибка отправки email", e);
+            throw new EmailSendException("Ошибка отправки email", e);
         }
     }
 }
