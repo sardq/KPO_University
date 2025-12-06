@@ -131,7 +131,6 @@ class GroupServiceTest {
         verify(groupRepository).save(newGroup);
     }
 
-
     @Test
     void update_WithValidData_ShouldUpdateGroup() {
         Long groupId = 1L;
@@ -311,13 +310,13 @@ class GroupServiceTest {
         int size = 20;
         Page<GroupEntity> expectedPage = new PageImpl<>(Collections.singletonList(testGroup));
 
-        when(groupRepository.searchByText("test", any(PageRequest.class)))
+        when(groupRepository.searchByText(eq("test"), any(PageRequest.class)))
                 .thenReturn(expectedPage);
 
         Page<GroupEntity> result = groupService.filter(search, null, page, size);
 
         assertNotNull(result);
-        verify(groupRepository).searchByText("test",
+        verify(groupRepository).searchByText(eq("test"),
                 argThat(pageable -> pageable.getPageNumber() == 0 &&
                         pageable.getPageSize() == 20 &&
                         pageable.getSort().equals(Sort.by("name"))));
