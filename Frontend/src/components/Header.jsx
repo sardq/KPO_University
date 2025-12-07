@@ -8,7 +8,7 @@ export default function Header({ pageTitle, logoSrc }) {
    const location = useLocation();
   const { role, email, setRole, setEmail } = useContext(AuthContent);
   const isAdminOn2FAPage = role === 'ADMIN' && (location.pathname === '/emailAuth' || location.pathname === '/authSelection');
-  const showUserMenu = !isAdminOn2FAPage && email;
+  const showUserMenu = !isAdminOn2FAPage && localStorage.getItem("token");
   const handleLogout = () => {
     localStorage.removeItem('token');
     

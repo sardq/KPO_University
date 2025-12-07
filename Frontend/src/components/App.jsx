@@ -9,11 +9,10 @@ import { AuthContent } from './AuthContent';
 function App() {
   const [role, setRole] = useState(null);
   const [email, setEmail] = useState(null);
-  const [checkedAdmin, setCheckedAdmin] = useState(false);
   return (
     <div className="App">
       <div className="app-wrapper">
-        <AuthContent.Provider value={{ role, setRole, email, setEmail, checkedAdmin, setCheckedAdmin }}>
+        <AuthContent.Provider value={{ role, setRole, email, setEmail }}>
             <Header pageTitle="Электронный журнал" logoSrc={logo} />
             <AppContent />
         </AuthContent.Provider>

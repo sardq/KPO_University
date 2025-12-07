@@ -5,6 +5,7 @@ import demo.models.GroupEntity;
 import demo.models.UserEntity;
 import demo.repositories.GroupRepository;
 import demo.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +30,7 @@ public class GroupService {
     private final GroupRepository repository;
     private final UserRepository userRepository;
     private final GroupService self;
+
     public GroupService(GroupRepository repository,
             UserRepository userRepository,
             @Lazy GroupService self) {
@@ -64,8 +67,8 @@ public class GroupService {
 
     @Transactional
     public GroupEntity create(GroupEntity entity) {
-         logger.info("Создание новой группы с именем, длиной {} символов", 
-            entity.getName() != null ? entity.getName().length() : 0);
+        logger.info("Создание новой группы с именем, длиной {} символов",
+                entity.getName() != null ? entity.getName().length() : 0);
         if (repository.findByName(entity.getName()).isPresent()) {
             throw new IllegalArgumentException("Группа уже существует: " + entity.getName());
         }
@@ -153,5 +156,13 @@ public class GroupService {
         logger.info("Фильтрация дисциплин выполнена, page={}, pageSize={}", page, size);
         var pageable = PageRequest.of(page, size, default_sort);
         return self.filter(search, disciplineId, pageable);
+    }
+
+    public List<UserEntity> getStudentsByGroupId(Long groupId) {
+        GroupEntity discipline = repository.findByIdWithStudents(
+                groupId)
+                .orElseThrow(() -> new EntityNotFoundException("Discipline not found with id: " + groupId));
+
+        return new ArrayList<>(discipline.getStudents());
     }
 }

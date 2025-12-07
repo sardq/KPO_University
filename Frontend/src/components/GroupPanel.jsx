@@ -95,7 +95,6 @@ const GroupPanel = () => {
   const loadGroupDetails = async (groupId) => {
     try {
       const groupDetails = await groupActions.getGroupById(groupId);
-      console.log(groupDetails);
       setStudents(availableStudents.filter(s => groupDetails.studentIds.includes(s.id)));
     } catch (error) {
       console.error("Ошибка загрузки студентов группы:", error);
@@ -154,7 +153,6 @@ const GroupPanel = () => {
   };
 
   const handleOpenDeleteModal = async (group) => {
-  console.log('Открытие удаления для группы:', group);
   setCurrentGroup(group);
   
   try {

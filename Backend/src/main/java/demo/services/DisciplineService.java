@@ -5,6 +5,10 @@ import demo.models.DisciplineEntity;
 import demo.models.GroupEntity;
 import demo.repositories.DisciplineRepository;
 import demo.repositories.GroupRepository;
+import jakarta.persistence.EntityNotFoundException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +55,8 @@ public class DisciplineService {
 
     @Transactional
     public DisciplineEntity create(DisciplineEntity entity) {
-        logger.info("Создание новой дисциплины с именем, длиной {} символов", 
-            entity.getName() != null ? entity.getName().length() : 0);
+        logger.info("Создание новой дисциплины с именем, длиной {} символов",
+                entity.getName() != null ? entity.getName().length() : 0);
         if (repository.findByName(entity.getName()).isPresent()) {
             throw new IllegalArgumentException("Discipline already exists");
         }
@@ -142,5 +146,12 @@ public class DisciplineService {
 
         logger.info(LOG_RESPONSE, result);
         return result;
+    }
+
+    public List<GroupEntity> getGroupsByDisciplineId(Long disciplineId) {
+        DisciplineEntity discipline = repository.findByIdWithGroups(disciplineId)
+                .orElseThrow(() -> new EntityNotFoundException("Discipline not found with id: " + disciplineId));
+
+        return new ArrayList<>(discipline.getGroups());
     }
 }

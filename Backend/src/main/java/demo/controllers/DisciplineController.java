@@ -1,14 +1,18 @@
 package demo.controllers;
 
 import demo.dto.DisciplineDto;
+import demo.dto.GroupDto;
 import demo.models.DisciplineEntity;
+import demo.models.GroupEntity;
 import demo.services.DisciplineService;
 import demo.core.configuration.Constants;
 import demo.core.configuration.DisciplineMapper;
+import demo.core.configuration.GroupMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -23,10 +27,12 @@ public class DisciplineController {
 
     private final DisciplineService service;
     private final DisciplineMapper modelMapper;
+    private final GroupMapper groupMapper;
 
-    public DisciplineController(DisciplineService service, DisciplineMapper modelMapper) {
+    public DisciplineController(DisciplineService service, DisciplineMapper modelMapper, GroupMapper groupMapper) {
         this.service = service;
         this.modelMapper = modelMapper;
+        this.groupMapper = groupMapper;
     }
 
     @GetMapping
@@ -93,5 +99,16 @@ public class DisciplineController {
         logger.info("Удаление группы {} из дисциплины {}", groupId, disciplineId);
         DisciplineEntity discipline = service.removeGroup(disciplineId, groupId);
         return modelMapper.toDto(discipline);
+    }
+
+    @GetMapping("/{disciplineId}/groups")
+    public ResponseEntity<List<GroupDto>> getGroupsByDiscipline(@PathVariable Long disciplineId) {
+        List<GroupEntity> groups = service.getGroupsByDisciplineId(disciplineId);
+
+        List<GroupDto> groupDtos = groups.stream()
+                .map(groupMapper::toDto)
+                .toList();
+
+        return ResponseEntity.ok(groupDtos);
     }
 }

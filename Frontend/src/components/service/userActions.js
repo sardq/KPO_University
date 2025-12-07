@@ -14,10 +14,7 @@ api.interceptors.request.use(
         const token = localStorage.getItem('token');
         if (token && token !== 'null' && token !== 'undefined') {
             config.headers.Authorization = `Bearer ${token}`;
-            console.log('Токен добавлен в запрос:', config.url);
-        } else {
-            console.warn('Токен не найден для запроса:', config.url);
-        }
+        } 
         return config;
     },
     (error) => {
@@ -27,7 +24,6 @@ api.interceptors.request.use(
 
 export const filterUsers = async (search = "", role = "", page = 0, pageSize = 5) => {
     try {
-        console.log('Запрос пользователей...');
         
         const response = await api.get(`${BASE_URL}/filter`, {
             params: {
@@ -38,11 +34,10 @@ export const filterUsers = async (search = "", role = "", page = 0, pageSize = 5
             }
         });
         
-        console.log('Успешный ответ:', response.status);
         return response.data;
     } catch (error) {
         console.error('Ошибка запроса пользователей:', {
-            url: error.config?.url,
+            url: error.config?.url, 
             status: error.response?.status,
             message: error.response?.data || error.message,
             headers: error.config?.headers
