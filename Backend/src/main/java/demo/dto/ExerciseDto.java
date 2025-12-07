@@ -38,11 +38,7 @@ public class ExerciseDto {
     }
 
     public void setDateFromLocalDateTime(LocalDateTime dateTime) {
-        if (dateTime != null) {
-            this.date = dateTime.format(FORMATTER);
-        } else {
-            this.date = null;
-        }
+        this.date = dateTime.format(FORMATTER);
     }
 
     public Long getId() {

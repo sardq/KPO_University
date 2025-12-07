@@ -30,7 +30,7 @@ public class ExerciseController {
         this.modelMapper = modelMapper;
     }
 
-    private ExerciseDto toDto(ExerciseEntity entity) {
+    public ExerciseDto toDto(ExerciseEntity entity) {
         if (entity == null) {
             return null;
         }

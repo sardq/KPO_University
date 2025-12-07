@@ -43,7 +43,7 @@ public class ExerciseEntity extends BaseEntity {
     }
 
     public void setDate(LocalDateTime date) {
-        this.date = date != null ? date.withSecond(0).withNano(0) : null;
+        this.date =  date.withSecond(0).withNano(0);
     }
 
     public String getDescription() {
