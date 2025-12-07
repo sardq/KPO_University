@@ -5,6 +5,9 @@ import java.util.Objects;
 import demo.core.models.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -27,6 +30,9 @@ public class UserEntity extends BaseEntity {
     private String lastName;
     @Column(nullable = false)
     private UserRole role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private GroupEntity group;
 
     public UserEntity() {
     }
@@ -43,6 +49,14 @@ public class UserEntity extends BaseEntity {
 
     public String getLogin() {
         return login;
+    }
+
+    public GroupEntity getGroup() {
+        return group;
+    }
+
+    public void setGroup(GroupEntity group) {
+        this.group = group;
     }
 
     public void setLogin(String login) {
