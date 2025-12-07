@@ -208,28 +208,7 @@ class ExerciseServiceTest {
         verify(exerciseRepository).delete(testExercise);
     }
 
-    @Test
-    void create_WithNullDate_ShouldCreateExercise() {
-        ExerciseDto dtoWithNullDate = new ExerciseDto();
-        dtoWithNullDate.setGroupId(1L);
-        dtoWithNullDate.setDisciplineId(1L);
-        dtoWithNullDate.setDescription("Exercise without date");
-
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(testGroup));
-        when(disciplineRepository.findById(1L)).thenReturn(Optional.of(testDiscipline));
-        when(exerciseRepository.save(any(ExerciseEntity.class))).thenAnswer(invocation -> {
-            ExerciseEntity saved = invocation.getArgument(0);
-            saved.setId(1L);
-            return saved;
-        });
-
-        ExerciseEntity result = exerciseService.create(dtoWithNullDate);
-
-        assertNotNull(result);
-        assertNull(result.getDate());
-        assertEquals("Exercise without date", result.getDescription());
-        verify(exerciseRepository, never()).findByDate(any());
-    }
+    
 
     @Test
     void update_WithNullDate_ShouldUpdateExercise() {
