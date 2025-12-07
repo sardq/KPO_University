@@ -15,6 +15,7 @@ import ResetPasswordForm from './ResetPasswordForm';
 import DisciplinePanel from './DisciplinePanel';
 import GroupPanel from './GroupPanel';
 import UserPanel from './UserPanel';
+import JournalPanel from './JournalPanel';
 
 const decodeToken = (token) => {
   try {
@@ -27,19 +28,10 @@ const decodeToken = (token) => {
 
 const getRoleFromToken = (token) => {
   const decoded = decodeToken(token);
-  if (decoded && decoded.role) {
-    return decoded.role;
-  }
-  return null;
+  return decoded?.role || decoded?.authorities?.[0]?.authority || null;
 };
 
-const getLoginFromToken = (token) => {
-  const decoded = decodeToken(token);
-  if (decoded && decoded.sub) {
-    return decoded.sub;
-  }
-  return null;
-};
+
 
 export default function AppContent() {
   const { role, setRole, setEmail } = useContext(AuthContent);
@@ -48,34 +40,35 @@ export default function AppContent() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('AppContent mounted');
     const token = localStorage.getItem('token');
     
     if (token) {
       setAuthHeader(token);
       
       const roleFromToken = getRoleFromToken(token);
-      const loginFromToken = getLoginFromToken(token); 
       
-      console.log('Данные из токена:', { roleFromToken, loginFromToken });
-      
-      if (roleFromToken && loginFromToken) {
+      if (roleFromToken) {
         setRole(roleFromToken);
+        console.log('role in context:', role);
         setIsLoading(false);
         
-         if (roleFromToken === 'STUDENT') {
-          navigate('/studentHome');
-        } else if (roleFromToken === 'TEACHER') {
-          navigate('/teacherHome');
-        }
+        
       } else {
         request('GET', '/api/user/me')
           .then(response => {
             const userData = response.data;
-            console.log('User data loaded from server:', userData);
             setRole(userData.role);
             setEmail(userData.email); 
             setIsLoading(false);
+            
+            const currentPath = window.location.pathname;
+            if (userData.role === 'STUDENT' && !currentPath.includes('/studentHome')) {
+              navigate('/studentHome');
+            } else if (userData.role === 'TEACHER' && !currentPath.includes('/teacherHome')) {
+              navigate('/teacherHome');
+            } else if (userData.role === 'ADMIN' && !currentPath.includes('/authSelection')) {
+              navigate('/authSelection');
+            }
           })
           .catch(error => {
             console.error('Failed to load user data:', error);
@@ -84,36 +77,37 @@ export default function AppContent() {
             setRole(null);
             setEmail(null);
             setIsLoading(false);
+            navigate('/login');
           });
       }
     } else {
       setIsLoading(false);
+      if (!window.location.pathname.includes('/login') && 
+          !window.location.pathname.includes('/resetPassword')) {
+        navigate('/login');
+      }
     }
-  }, [navigate, setRole, setEmail]);
+  }, [navigate, setRole, setEmail, role]);
 
   const onLogin = (e, login, password) => {
     e.preventDefault();
-    console.log('Login attempt for:', login);
     
     request('POST', '/login', { login, password })
       .then((response) => {
         const data = response.data;
-        console.log('Login successful:', data);
         
         const token = data.token;
         localStorage.setItem('token', token);
         setAuthHeader(token);
         
         const roleFromToken = getRoleFromToken(token);
-        
-        setRole(roleFromToken || data.role);
-        setEmail(data.email);
-        
         const finalRole = roleFromToken || data.role;
+        
+        setRole(finalRole);
+        setEmail(data.email || login);
         
         if (finalRole === 'ADMIN') {
           navigate('/authSelection'); 
-
         } else if (finalRole === 'STUDENT') {
           navigate('/studentHome');
         } else if (finalRole === 'TEACHER') {
@@ -194,6 +188,14 @@ export default function AppContent() {
         }
       />
       <Route
+        path="/journalPanel"
+        element={
+          <ProtectedRoute role={role} allowed={["TEACHER"]}>
+            <JournalPanel />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/disciplinePanel"
         element={
           <ProtectedRoute role={role} allowed={["ADMIN"]}>
@@ -224,7 +226,7 @@ export default function AppContent() {
           !localStorage.getItem('token') ? (
             <Navigate to="/login" replace /> 
           ) : role === "ADMIN" ? (
-            <Navigate to="/authSelect" replace /> 
+            <Navigate to="/authSelection" replace /> 
           ) : role === "STUDENT" ? (
             <Navigate to="/studentHome" replace /> 
           ) : role === "TEACHER" ? (

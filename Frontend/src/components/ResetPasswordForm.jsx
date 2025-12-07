@@ -36,7 +36,6 @@ const ResetPasswordForm = () => {
         navigate('/login');
       })
       .catch(() => {
-        console.log(email);
         setErrors({ email: 'Ошибка при отправке запроса.' });
       });
   };

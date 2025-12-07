@@ -94,7 +94,6 @@ const DisciplinePanel = () => {
   const loadDisciplineDetails = async (disciplineId) => {
     try {
       const disciplineDetails = await disciplineActions.getDisciplineById(disciplineId);
-      console.log(disciplineDetails);
       setGroups(availableGroups.filter(g => disciplineDetails.groupIds.includes(g.id)));
     } catch (error) {
       console.error("Ошибка загрузки групп дисциплины:", error);
@@ -236,8 +235,6 @@ const DisciplinePanel = () => {
   const handleAddGroups = async () => {
     try {
       if (selectedGroupIds.length > 0) {
-        console.log(currentDiscipline.id);
-        console.log(selectedGroupIds);
         await disciplineActions.addGroupsToDiscipline(currentDiscipline.id, selectedGroupIds);
         showToastMessage(`Добавлено ${selectedGroupIds.length} групп к дисциплине ${currentDiscipline.name}`, "success");
       } else {

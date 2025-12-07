@@ -107,7 +107,6 @@ export const addGroupsToDiscipline = async (disciplineId, groupIds) => {
       api.post(`${BASE_URL}/${disciplineId}/groups/${groupId}`)
     );
     const responses = await Promise.all(promises);
-    console.log(responses);
 
     return responses.map(r => r.data);
   } catch (error) {
@@ -131,7 +130,6 @@ export const getDisciplineGroups = async (disciplineId) => {
     const response = await api.get(`${BASE_URL}/${disciplineId}/groups`);
     return response.data;
   } catch (error) {
-    console.error('Error in getDisciplineGroups:', error.response?.data || error.message);
     throw error;
   }
 };

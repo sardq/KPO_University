@@ -1,14 +1,18 @@
 package demo.controllers;
 
 import demo.models.GroupEntity;
+import demo.models.UserEntity;
 import demo.dto.GroupDto;
+import demo.dto.UserDto;
 import demo.services.GroupService;
 import demo.core.configuration.Constants;
 import demo.core.configuration.GroupMapper;
+import demo.core.configuration.UserMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -24,10 +28,12 @@ public class GroupController {
 
     private final GroupService service;
     private final GroupMapper modelMapper;
+    private final UserMapper userMapper;
 
-    public GroupController(GroupService service, GroupMapper modelMapper) {
+    public GroupController(GroupService service, GroupMapper modelMapper, UserMapper userMapper) {
         this.service = service;
         this.modelMapper = modelMapper;
+        this.userMapper = userMapper;
     }
 
     private GroupDto toDto(GroupEntity entity) {
@@ -102,4 +108,16 @@ public class GroupController {
         GroupEntity group = service.removeStudent(groupId, studentId);
         return toDto(group);
     }
+
+    @GetMapping("/{groupId}/students")
+    public ResponseEntity<List<UserDto>> getStudentsByGroup(@PathVariable Long groupId) {
+        List<UserEntity> students = service.getStudentsByGroupId(groupId);
+
+        List<UserDto> studentDtos = students.stream()
+                .map(userMapper::toUserDto)
+                .toList();
+
+        return ResponseEntity.ok(studentDtos);
+    }
+
 }

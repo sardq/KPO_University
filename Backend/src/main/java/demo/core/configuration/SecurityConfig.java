@@ -43,7 +43,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login", "/register", "/reset-password",
                                 "/api/otp/**")
                         .permitAll()
-                        .requestMatchers("/api/disciplines/**","/api/groups/**" ,"/api/users").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers("/api/disciplines/**", "/api/groups/**", "/api/exercises/**")
+                        .hasAnyRole("TEACHER", "ADMIN")
                         .requestMatchers("/api/user/me").authenticated()
                         .anyRequest().authenticated());
         return http.build();

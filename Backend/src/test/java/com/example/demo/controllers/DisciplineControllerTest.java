@@ -5,6 +5,8 @@ import demo.models.DisciplineEntity;
 import demo.services.DisciplineService;
 import demo.controllers.DisciplineController;
 import demo.core.configuration.DisciplineMapper;
+import demo.core.configuration.GroupMapper;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +28,8 @@ class DisciplineControllerTest {
 
     @Mock
     private DisciplineMapper mapper;
-
+    @Mock
+    private GroupMapper groupMapper;
     @InjectMocks
     private DisciplineController controller;
 
@@ -120,4 +123,5 @@ class DisciplineControllerTest {
 
         assertEquals(dto, result);
     }
+
 }
