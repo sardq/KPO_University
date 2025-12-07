@@ -111,30 +111,30 @@ class ExerciseEntityTest {
 
     @Test
     void testEquals_WithSameObject() {
-        assertTrue(exercise1.equals(exercise1));
+        assertEquals( exercise1,exercise1 );
     }
 
     @Test
     void testEquals_WithNull() {
-        assertFalse(exercise1.equals(null));
+        assertNotEquals(exercise1,null);
     }
 
     @Test
     void testEquals_WithDifferentClass() {
         String notAnExercise = "I'm a string, not an ExerciseEntity";
-        assertFalse(exercise1.equals(notAnExercise));
+        assertNotEquals(exercise1, notAnExercise);
     }
 
     @Test
     void testEquals_WithEqualObjects() {
-        assertTrue(exercise1.equals(exercise2));
-        assertTrue(exercise2.equals(exercise1));
+        assertEquals(exercise1, exercise2);
+        assertEquals(exercise2, exercise1);
     }
 
     @Test
     void testEquals_WithDifferentIds() {
-        assertFalse(exercise1.equals(exercise3));
-        assertFalse(exercise3.equals(exercise1));
+        assertNotEquals(exercise1,exercise3);
+        assertNotEquals(exercise3,exercise1);
     }
 
     @Test
@@ -143,7 +143,7 @@ class ExerciseEntityTest {
         ExerciseEntity differentExercise = new ExerciseEntity(differentDate, testDescription, testGroup, testDiscipline);
         differentExercise.setId(1L);
         
-        assertFalse(exercise1.equals(differentExercise));
+        assertNotEquals(exercise1,differentExercise);
     }
 
     
@@ -156,12 +156,8 @@ class ExerciseEntityTest {
         ExerciseEntity differentGroupExercise = new ExerciseEntity(testDate, testDescription, differentGroup, testDiscipline);
         differentGroupExercise.setId(1L);
         
-        assertFalse(exercise1.equals(differentGroupExercise));
+        assertNotEquals(exercise1, differentGroupExercise);
     }
-
- 
-
-    
 
     @Test
     void testEquals_WithDifferentDisciplines() {
@@ -171,7 +167,7 @@ class ExerciseEntityTest {
         ExerciseEntity differentDisciplineExercise = new ExerciseEntity(testDate, testDescription, testGroup, differentDiscipline);
         differentDisciplineExercise.setId(1L);
         
-        assertFalse(exercise1.equals(differentDisciplineExercise));
+        assertNotEquals(exercise1,differentDisciplineExercise);
     }
 
 
@@ -186,9 +182,9 @@ class ExerciseEntityTest {
         ExerciseEntity exerciseC = new ExerciseEntity(testDate, testDescription, testGroup, testDiscipline);
         exerciseC.setId(1L);
         
-        assertTrue(exerciseA.equals(exerciseB));
-        assertTrue(exerciseB.equals(exerciseC));
-        assertTrue(exerciseA.equals(exerciseC));
+        assertEquals(exerciseA,exerciseB);
+        assertEquals(exerciseB,exerciseC);
+        assertEquals(exerciseA,exerciseC);
     }
 
     @Test

@@ -183,17 +183,17 @@ class ExerciseControllerTest {
         Long groupId = 2L;
         
         LocalDateTime dateTime = LocalDateTime.of(2024,1,15,10,0);
-        ExerciseEntity exercise = new ExerciseEntity();
-        exercise.setId(1L);
-        exercise.setDescription("Single Exercise");
-        exercise.setDate(dateTime);
-        ExerciseDto dto = new ExerciseDto();
-        dto.setId(1L);
-        dto.setDescription("Single Exercise");
-        dto.setDate(dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        ExerciseEntity exerciseNew = new ExerciseEntity();
+        exerciseNew.setId(1L);
+        exerciseNew.setDescription("Single Exercise");
+        exerciseNew.setDate(dateTime);
+        ExerciseDto dtoNew = new ExerciseDto();
+        dtoNew.setId(1L);
+        dtoNew.setDescription("Single Exercise");
+        dtoNew.setDate(dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         
         when(service.getByDisciplineAndGroup(disciplineId, groupId)).thenReturn(List.of(exercise));
-        when(modelMapper.map(exercise, ExerciseDto.class)).thenReturn(dto);
+        when(modelMapper.map(exercise, ExerciseDto.class)).thenReturn(dtoNew);
         
         List<ExerciseDto> result = controller.getByDisciplineAndGroup(disciplineId, groupId);
         
@@ -253,16 +253,16 @@ class ExerciseControllerTest {
     void testGetAll_WithCustomPage() {
         int page = 2;
         
-        ExerciseEntity exercise = new ExerciseEntity();
+        exercise  = new ExerciseEntity();
         exercise.setId(1L);
         exercise.setDescription("Exercise");
         LocalDateTime dateTime = LocalDateTime.of(2024,1,15,10,0);
         exercise.setDate(dateTime);
 
-        ExerciseDto dto = new ExerciseDto();
+        dto = new ExerciseDto();
         dto.setId(1L);
         dto.setDescription("Exercise");
-         dto.setDate(dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        dto.setDate(dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         Page<ExerciseEntity> pageResult = new PageImpl<>(List.of(exercise));
         
@@ -308,7 +308,7 @@ class ExerciseControllerTest {
         LocalDateTime dateTime = LocalDateTime.of(2024,1,15,10,0);
         exercise.setDate(dateTime);
 
-        ExerciseDto dto = new ExerciseDto();
+        dto = new ExerciseDto();
         dto.setId(1L);
         dto.setDate("2024-01-15T10:00");
         dto.setDescription("Test");
