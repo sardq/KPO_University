@@ -91,4 +91,21 @@ public class GradeController {
         return service.getByGroupAndDiscipline(groupId, disciplineId);
     }
 
+    @GetMapping("/avg/student/{studentId}")
+    public Double getStudentAverage(@PathVariable Long studentId) {
+        return service.getStudentAverage(studentId);
+    }
+
+    @GetMapping("/avg/discipline/{disciplineId}")
+    public Double getDisciplineAverage(@PathVariable Long disciplineId) {
+        return service.getDisciplineAverage(disciplineId);
+    }
+
+    @GetMapping("/avg/students/{groupId}/{disciplineId}")
+    public List<GradeDto.StudentAvg> getStudentsAverages(
+            @PathVariable Long groupId,
+            @PathVariable Long disciplineId) {
+        return service.getStudentsAverages(groupId, disciplineId);
+    }
+
 }

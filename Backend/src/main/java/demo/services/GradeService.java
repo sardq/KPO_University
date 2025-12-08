@@ -122,4 +122,19 @@ public class GradeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Double getStudentAverage(Long studentId) {
+        return repository.getStudentAverage(studentId);
+    }
+
+    @Transactional(readOnly = true)
+    public Double getDisciplineAverage(Long disciplineId) {
+        return repository.getDisciplineAverage(disciplineId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GradeDto.StudentAvg> getStudentsAverages(Long groupId, Long disciplineId) {
+        return repository.getStudentsAverages(groupId, disciplineId);
+    }
+
 }

@@ -1,5 +1,6 @@
 package demo.repositories;
 
+import demo.dto.GradeDto;
 import demo.models.GradeEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -40,4 +41,60 @@ public interface GradeRepository extends
             @Param("disciplineId") Long disciplineId);
 
     Page<GradeEntity> findAll(Pageable pageable);
+
+    @Query("""
+            SELECT AVG(
+                CASE
+                    WHEN g.value = demo.models.GradeEnum.ONE THEN 1.0
+                    WHEN g.value = demo.models.GradeEnum.TWO THEN 2.0
+                    WHEN g.value = demo.models.GradeEnum.THREE THEN 3.0
+                    WHEN g.value = demo.models.GradeEnum.FOUR THEN 4.0
+                    WHEN g.value = demo.models.GradeEnum.FIVE THEN 5.0
+                    ELSE NULL
+                END
+            )
+            FROM GradeEntity g
+            WHERE g.student.id = :studentId
+            """)
+    Double getStudentAverage(@Param("studentId") Long studentId);
+
+    @Query("""
+            SELECT AVG(
+                CASE
+                    WHEN g.value = demo.models.GradeEnum.ONE THEN 1.0
+                    WHEN g.value = demo.models.GradeEnum.TWO THEN 2.0
+                    WHEN g.value = demo.models.GradeEnum.THREE THEN 3.0
+                    WHEN g.value = demo.models.GradeEnum.FOUR THEN 4.0
+                    WHEN g.value = demo.models.GradeEnum.FIVE THEN 5.0
+                    ELSE NULL
+                END
+            )
+            FROM GradeEntity g
+            JOIN g.exercise e
+            JOIN e.discipline d
+            WHERE d.id = :disciplineId
+            """)
+    Double getDisciplineAverage(@Param("disciplineId") Long disciplineId);
+
+    @Query("""
+            SELECT AVG(
+                CASE
+                    WHEN g.value = demo.models.GradeEnum.ONE THEN 1.0
+                    WHEN g.value = demo.models.GradeEnum.TWO THEN 2.0
+                    WHEN g.value = demo.models.GradeEnum.THREE THEN 3.0
+                    WHEN g.value = demo.models.GradeEnum.FOUR THEN 4.0
+                    WHEN g.value = demo.models.GradeEnum.FIVE THEN 5.0
+                    ELSE NULL
+                END
+            )
+            FROM GradeEntity g
+            JOIN g.exercise e
+            WHERE e.group.id = :groupId
+            AND e.discipline.id = :disciplineId
+            GROUP BY g.student.id
+            """)
+    List<GradeDto.StudentAvg> getStudentsAverages(
+            @Param("groupId") Long groupId,
+            @Param("disciplineId") Long disciplineId);
+
 }

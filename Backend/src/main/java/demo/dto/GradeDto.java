@@ -1,6 +1,9 @@
 package demo.dto;
 
 import demo.models.GradeEntity;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 public class GradeDto {
 
@@ -58,5 +61,34 @@ public class GradeDto {
         dto.setExerciseId(e.getExercise().getId());
         dto.setValue(e.getValue().getCode());
         return dto;
+    }
+
+    public static class StudentAvg {
+        private Long studentId;
+        private Double avg;
+
+        public StudentAvg() {
+        }
+
+        public StudentAvg(Long studentId, Double avg) {
+            this.studentId = studentId;
+            this.avg = avg;
+        }
+
+        public Long getStudentId() {
+            return studentId;
+        }
+
+        public void setStudentId(Long studentId) {
+            this.studentId = studentId;
+        }
+
+        public Double getAvg() {
+            return avg;
+        }
+
+        public void setAvg(Double avg) {
+            this.avg = avg;
+        }
     }
 }
