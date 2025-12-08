@@ -11,9 +11,6 @@ public class GradeDto {
     private Long exerciseId;
     private Long studentId;
 
-    public GradeDto() {
-    }
-
     public Long getId() {
         return id;
     }

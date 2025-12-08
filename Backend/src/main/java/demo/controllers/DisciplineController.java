@@ -133,7 +133,6 @@ public class DisciplineController {
     @GetMapping("/teacher/{teacherId}")
     public List<DisciplineDto> getDisciplinesByTeacher(@PathVariable Long teacherId) {
         List<DisciplineEntity> list = service.getDisciplinesByTeacher(teacherId);
-        var result = list.stream().map(modelMapper::toDto).toList();
-        return result;
+        return list.stream().map(modelMapper::toDto).toList();
     }
 }

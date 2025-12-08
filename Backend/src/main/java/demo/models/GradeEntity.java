@@ -26,9 +26,6 @@ public class GradeEntity extends BaseEntity {
     @JoinColumn(name = "student_id", nullable = false)
     private UserEntity student;
 
-    public GradeEntity() {
-    }
-
     public GradeEnum getValue() {
         return value;
     }
