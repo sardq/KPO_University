@@ -24,6 +24,8 @@ class DisciplineMapperTest {
     @BeforeEach
     void setUp() {
         groupRepository = mock(GroupRepository.class);
+        userRepository = mock(UserRepository.class);
+
         disciplineMapper = new DisciplineMapper(groupRepository, userRepository);
     }
 
