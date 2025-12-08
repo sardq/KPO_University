@@ -8,7 +8,7 @@ public enum GradeEnum {
     FOUR("4"),
     FIVE("5"),
     SICK("Б"),
-    ABSENT("О"),
+    ABSENT("Н"),
     VALID_REASON("УП");
 
     private final String code;

@@ -20,7 +20,7 @@ public class DisciplineEntity extends BaseEntity {
 
     @ManyToMany(mappedBy = "disciplines")
     private Set<GroupEntity> groups = new HashSet<>();
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "discipline_teachers", joinColumns = @JoinColumn(name = "discipline_id"), inverseJoinColumns = @JoinColumn(name = "teacher_id"))
     private Set<UserEntity> teachers = new HashSet<>();
 

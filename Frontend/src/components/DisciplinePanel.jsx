@@ -2,6 +2,7 @@ import './App.css'
 import React, { useState, useEffect, useCallback } from 'react';
 import MyToast from './MyToast';
 import * as disciplineActions from './service/disciplineActions';
+import * as userActions from './service/userActions';
 import * as groupActions from './service/groupActions';
 import {
   Card,
@@ -49,11 +50,17 @@ const DisciplinePanel = () => {
   const [groups, setGroups] = useState([]);
   const [availableGroups, setAvailableGroups] = useState([]);
   const [selectedGroupIds, setSelectedGroupIds] = useState([]);
-  
+  const [showAddTeachersModal, setShowAddTeachersModal] = useState(false);
+  const [showManageTeachersModal, setShowManageTeachersModal] = useState(false);
+  const [teachers, setTeachers] = useState([]);
+  const [availableTeachers, setAvailableTeachers] = useState([]);
+  const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
+  const [addTeachersSearch, setAddTeachersSearch] = useState("");
+  const [manageTeachersSearch, setManageTeachersSearch] = useState("");
   const [formData, setFormData] = useState({
     name: "",
   });
-
+  
   const [state, setState] = useState({
     disciplines: [],
     search: "",
@@ -62,7 +69,28 @@ const DisciplinePanel = () => {
     totalPages: 0,
     totalElements: 0,
   });
-  
+  const getStudentFullName = (student) => {
+    return `${student.firstName || ''} ${student.lastName || ''}`.trim() || student.login;
+  };
+  const loadDisciplineTeachers = async (disciplineId) => {
+  try {
+    const disciplineDetails = await disciplineActions.getDisciplineById(disciplineId);
+    setTeachers(
+      availableTeachers.filter(t => disciplineDetails.teacherIds.includes(t.id))
+    );
+  } catch (error) {
+    console.error("Ошибка загрузки преподавателей дисциплины:", error);
+  }
+};
+const loadAvailableTeachers = async () => {
+  try {
+    const data = await userActions.filterUsers("", "TEACHER", 0, 100); 
+    console.log("availableTeachers =", data);
+    setAvailableTeachers(data.content || []);
+  } catch (error) {
+    console.error("Ошибка загрузки преподавателей:", error);
+  }
+};
   const getDisciplines = useCallback(async (page) => {
     try {
       const pageNumber = page - 1;
@@ -89,6 +117,7 @@ const DisciplinePanel = () => {
   useEffect(() => {
     getDisciplines(state.currentPage);
     loadAvailableGroups();
+    loadAvailableTeachers();
   }, [getDisciplines, state.currentPage]);
 
   const loadDisciplineDetails = async (disciplineId) => {
@@ -155,7 +184,52 @@ const DisciplinePanel = () => {
     setCurrentDiscipline(discipline);
     setShowDeleteModal(true);
   };
+  const handleOpenAddTeachersModal = async (discipline) => {
+  setCurrentDiscipline(discipline);
+  setSelectedTeacherIds([]);
+  setShowAddTeachersModal(true);
+};
 
+const handleOpenManageTeachersModal = async (discipline) => {
+  setCurrentDiscipline(discipline);
+  await loadDisciplineTeachers(discipline.id);
+  setShowManageTeachersModal(true);
+};
+
+const handleTeacherSelection = (teacherId) => {
+  setSelectedTeacherIds(prev => {
+    if (prev.includes(teacherId)) return prev.filter(id => id !== teacherId);
+    return [...prev, teacherId];
+  });
+};
+
+const handleAddTeachers = async () => {
+  if (selectedTeacherIds.length === 0) {
+    showToastMessage("Выберите хотя бы одного преподавателя", "warning");
+    return;
+  }
+  try {
+    await disciplineActions.addTeachersToDiscipline(currentDiscipline.id, selectedTeacherIds);
+    showToastMessage(`Добавлено ${selectedTeacherIds.length} преподавателей`, "success");
+    setShowAddTeachersModal(false);
+    getDisciplines(state.currentPage);
+  } catch (error) {
+    console.error("Ошибка при добавлении преподавателей:", error);
+    showToastMessage("Ошибка при добавлении преподавателей", "danger");
+  }
+};
+
+const handleRemoveTeacher = async (teacherId) => {
+  try {
+    await disciplineActions.removeTeacherFromDiscipline(currentDiscipline.id, teacherId);
+    showToastMessage("Преподаватель отвязан от дисциплины", "success");
+    await loadDisciplineTeachers(currentDiscipline.id);
+    getDisciplines(state.currentPage);
+  } catch (error) {
+    console.error("Ошибка при отвязке преподавателя:", error);
+    showToastMessage("Ошибка при отвязке преподавателя", "danger");
+  }
+};
   const handleOpenAddGroupsModal = async (discipline) => {
     setCurrentDiscipline(discipline);
     setSelectedGroupIds([]);
@@ -447,6 +521,81 @@ const DisciplinePanel = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+        
+      <Modal show={showAddTeachersModal} onHide={() => setShowAddTeachersModal(false)} size="lg">
+  <Modal.Header closeButton>
+    <Modal.Title className='text-white'>Добавить преподавателей к дисциплине: {currentDiscipline?.name}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
+    <FormControl
+      placeholder="Поиск преподавателей..."
+      size="sm"
+      className="mb-2"
+      value={addTeachersSearch}
+      onChange={(e) => setAddTeachersSearch(e.target.value)}
+    />
+    <ListGroup>
+      {availableTeachers
+        .filter(t => !currentDiscipline?.teacherIds?.includes(t.id))
+        .filter(s =>
+          getStudentFullName(s).toLowerCase().includes(addTeachersSearch.toLowerCase()) ||
+          (s.email || "").toLowerCase().includes(addTeachersSearch.toLowerCase())
+          )
+        .map(teacher => (
+          <ListGroup.Item
+            key={teacher.id}
+            action
+            onClick={() => handleTeacherSelection(teacher.id)}
+            active={selectedTeacherIds.includes(teacher.id)}
+          >
+            {teacher.firstName} {teacher.lastName} ({teacher.email})
+          </ListGroup.Item>
+        ))
+      }
+    </ListGroup>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowAddTeachersModal(false)}>Отмена</Button>
+    <Button variant="primary" onClick={handleAddTeachers}>Добавить выбранных</Button>
+  </Modal.Footer>
+</Modal>
+<Modal show={showManageTeachersModal} onHide={() => setShowManageTeachersModal(false)} size="lg">
+  <Modal.Header closeButton>
+    <Modal.Title className='text-white'>Преподаватели дисциплины: {currentDiscipline?.name}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
+    <FormControl
+      placeholder="Поиск преподавателей..."
+      size="sm"
+      className="mb-2"
+      value={manageTeachersSearch}
+      onChange={(e) => setManageTeachersSearch(e.target.value)}
+    />
+    {teachers.filter(s =>
+          getStudentFullName(s).toLowerCase().includes(manageTeachersSearch.toLowerCase()) ||
+          (s.email || "").toLowerCase().includes(manageTeachersSearch.toLowerCase())
+          ).length === 0 ? (
+      <p>К дисциплине не привязан ни один преподаватель</p>
+    ) : (
+      <ListGroup>
+       {teachers.filter(s =>
+          getStudentFullName(s).toLowerCase().includes(manageTeachersSearch.toLowerCase()) ||
+          (s.email || "").toLowerCase().includes(manageTeachersSearch.toLowerCase())
+          )
+          .map(teacher => (
+            <ListGroup.Item key={teacher.id} className="d-flex justify-content-between align-items-center">
+              <span>{teacher.firstName} {teacher.lastName} ({teacher.email})</span>
+              <Button size="sm" variant="outline-danger" onClick={() => handleRemoveTeacher(teacher.id)}>Отвязать</Button>
+            </ListGroup.Item>
+          ))
+        }
+      </ListGroup>
+    )}
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowManageTeachersModal(false)}>Закрыть</Button>
+  </Modal.Footer>
+</Modal>
 
       <Card className={"border border-dark bg-dark text-white"} style={{display: 'flex', flexDirection: 'column', flex: '1 1 auto', minHeight: 0, overflow: 'hidden' }}>
         <Card.Header className="bg-secondary text-white">
@@ -488,15 +637,21 @@ const DisciplinePanel = () => {
         <Card.Body style={{ overflowY: 'auto', flex: '1 1 auto', minHeight: 0 }}>
           <Table bordered hover striped variant="dark" style={{ tableLayout: "fixed", width: "100%" }}>
             <colgroup>
-              <col style={{ width: "30%" }} />
-              <col style={{ width: "15%" }} />
-              <col style={{ width: "55%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
             </colgroup>
             <thead>
               <tr>
                 <th>Название дисциплины</th>
                 <th>Количество групп</th>
-                <th>Действия</th>
+                <th>Количество преподавателей</th>
+                <th>Действия над группами</th>
+                <th>Действия над преподавателями</th>
+                <th>Действия над дисциплинами</th>
               </tr>
             </thead>
             <tbody>
@@ -514,6 +669,11 @@ const DisciplinePanel = () => {
                     <td>
                       <Badge bg="info" className="me-1">
                         <FontAwesomeIcon icon={faUsers} /> {discipline.groupsCount || 0}
+                      </Badge>
+                    </td>
+                     <td>
+                      <Badge bg="info" className="me-1">
+                        <FontAwesomeIcon icon={faUsers} /> {discipline.teacherIds?.length || 0}
                       </Badge>
                     </td>
                     <td>
@@ -536,7 +696,17 @@ const DisciplinePanel = () => {
                         >
                           <FontAwesomeIcon icon={faUserMinus} />
                         </Button>
-                        <Button
+                      </ButtonGroup>
+                    </td>
+                    <td>
+                      <Button size="sm" variant="outline-primary" onClick={() => handleOpenAddTeachersModal(discipline)}>
+                        <FontAwesomeIcon icon={faUserGroup} />
+                        </Button>
+                        <Button size="sm" variant="outline-warning" onClick={() => handleOpenManageTeachersModal(discipline)}>
+                        <FontAwesomeIcon icon={faUserMinus} />
+                        </Button>
+                    </td>
+                    <td><Button
                           size="sm"
                           variant="outline-info"
                           onClick={() => handleOpenEditModal(discipline)}
@@ -553,8 +723,7 @@ const DisciplinePanel = () => {
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </Button>
-                      </ButtonGroup>
-                    </td>
+                        </td>
                   </tr>
                 ))
               )}
