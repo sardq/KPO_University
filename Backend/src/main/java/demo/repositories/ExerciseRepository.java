@@ -32,8 +32,4 @@ public interface ExerciseRepository extends CrudRepository<ExerciseEntity, Long>
     List<ExerciseEntity> findByDisciplineIdAndGroupId(@Param("disciplineId") Long disciplineId,
             @Param("groupId") Long groupId);
 
-    // @Query("SELECT g FROM GroupEntity g LEFT JOIN FETCH g.students WHERE g.id =
-    // :groupId")
-    // Optional<GroupEntity> findByIdWithGrades(@Param("groupId") Long groupId);
-
 }

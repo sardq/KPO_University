@@ -110,19 +110,17 @@ const JournalPanel = () => {
     setShowModal(true);
   };
 
-  // Открытие модалки для редактирования существующего занятия
   const openModal = (exercise) => {
     setCurrentExercise(exercise);
     setExerciseForm({
       id: exercise.id,
-      date: exercise.date.slice(0,16), // для input datetime-local
+      date: exercise.date.slice(0,16), 
       description: exercise.description,
     });
     setFormError("");
     setShowModal(true);
   };
 
-  // Сохранение или обновление занятия
   const handleSaveExercise = async () => {
     setFormError("");
 
@@ -391,7 +389,6 @@ const JournalPanel = () => {
         let saved;
 
         if (editingGradeId) {
-          // UPDATE
           saved = await gradeActions.updateGrade(editingGradeId, {
             id: editingGradeId,
             studentId,
@@ -404,7 +401,6 @@ const JournalPanel = () => {
             prev.map(g => (g.id === editingGradeId ? saved : g))
           );
         } else {
-          // CREATE
           saved = await gradeActions.createGrade({
             studentId,
             exerciseId,

@@ -3,7 +3,6 @@ package demo.core.configuration;
 import demo.core.models.BaseEntity;
 import demo.dto.DisciplineDto;
 import demo.models.DisciplineEntity;
-import demo.models.UserEntity;
 import demo.repositories.GroupRepository;
 import demo.repositories.UserRepository;
 
