@@ -1,5 +1,8 @@
 package demo.models;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import demo.core.models.BaseEntity;
 import jakarta.persistence.*;
 
@@ -16,6 +19,7 @@ public class GradeEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exercise_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private ExerciseEntity exercise;
 
     @ManyToOne(fetch = FetchType.LAZY)

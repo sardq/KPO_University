@@ -15,6 +15,16 @@ public class DisciplineDto {
 
     @JsonProperty(access = Access.READ_ONLY)
     private List<Long> groupIds;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private List<Long> teacherIds;
+
+    public List<Long> getTeacherIds() {
+        return teacherIds;
+    }
+
+    public void setTeacherIds(List<Long> teacherIds) {
+        this.teacherIds = teacherIds;
+    }
 
     public Long getId() {
         return id;

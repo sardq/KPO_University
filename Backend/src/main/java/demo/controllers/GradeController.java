@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/grades")
+@RequestMapping(GradeController.URL)
 public class GradeController {
-
+    public static final String URL = Constants.API_URL + "/grades";
     private static final Logger logger = LoggerFactory.getLogger(GradeController.class);
 
     private final GradeService service;
@@ -33,6 +33,9 @@ public class GradeController {
             return null;
         }
         GradeDto dto = mapper.map(entity, GradeDto.class);
+        dto.setExerciseId(entity.getExercise().getId());
+        dto.setStudentId(entity.getStudent().getId());
+        dto.setValue(entity.getValue().getCode());
         return dto;
     }
 
@@ -47,38 +50,38 @@ public class GradeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GradeEntity> get(@PathVariable Long id) {
+    public ResponseEntity<GradeDto> get(@PathVariable Long id) {
         logger.info("Получение оценки id={}", id);
-        return ResponseEntity.ok(service.get(id));
+        return ResponseEntity.ok(toDto(service.get(id)));
     }
 
     @GetMapping("/exercise/{exerciseId}/{studentId}")
-    public ResponseEntity<GradeEntity> getByExerciseAndStudent(@PathVariable Long exerciseId,
+    public ResponseEntity<GradeDto> getByExerciseAndStudent(@PathVariable Long exerciseId,
             @PathVariable Long studentId) {
         logger.info("Получение оценок по занятию {} {}", exerciseId, studentId);
-        return ResponseEntity.ok(service.getByExerciseAndStudent(exerciseId, studentId));
+        return ResponseEntity.ok(toDto(service.getByExerciseAndStudent(exerciseId, studentId)));
     }
 
     @PostMapping
-    public ResponseEntity<GradeEntity> create(@RequestBody GradeDto dto) {
+    public ResponseEntity<GradeDto> create(@RequestBody GradeDto dto) {
         logger.info("Создание новой оценки");
         var result = service.create(dto);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(toDto(result));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GradeEntity> update(
+    public ResponseEntity<GradeDto> update(
             @PathVariable Long id,
             @RequestBody GradeDto dto) {
         logger.info("Обновление оценки {}", id);
         var result = service.update(id, dto);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(toDto(result));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<GradeEntity> delete(@PathVariable Long id) {
+    public ResponseEntity<GradeDto> delete(@PathVariable Long id) {
         logger.info("Удаление оценки {}", id);
-        return ResponseEntity.ok(service.delete(id));
+        return ResponseEntity.ok(toDto(service.delete(id)));
     }
 
     @GetMapping("/group/{groupId}/discipline/{disciplineId}")

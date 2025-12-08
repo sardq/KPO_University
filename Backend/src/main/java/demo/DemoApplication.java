@@ -74,6 +74,9 @@ public class DemoApplication implements CommandLineRunner {
             disciplineService.addGroup(d3.getId(), g3.getId());
             disciplineService.addGroup(d3.getId(), g1.getId());
             disciplineService.addGroup(d4.getId(), g2.getId());
+            disciplineService.addTeacher(d1.getId(), u2.getId());
+            disciplineService.addTeacher(d2.getId(), u2.getId());
+            disciplineService.addTeacher(d3.getId(), u2.getId());
         }
     }
 }

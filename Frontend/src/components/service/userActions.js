@@ -72,3 +72,7 @@ export const deleteUser = async (id) => {
     const response = await api.post(`${BASE_URL}/delete/${id}`);
     return response.data;
 };
+export const getMe = async () => {
+    const response = await api.get(`${BASE_URL}/me`);
+    return response.data;
+};

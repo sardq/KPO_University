@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/grades";
+const BASE_URL = "http://localhost:8080/api/grades";
 
 const api = axios.create({
     baseURL: "http://localhost:8080",
@@ -32,6 +32,7 @@ export const getGrade = async (exerciseId, studentId) => {
 
 export const createGrade = async (gradeData) => {
     const response = await api.post(`${BASE_URL}`, gradeData);
+    console.log(response);
     return response.data;
 };
 
@@ -45,11 +46,9 @@ export const deleteGrade = async (id) => {
     return response.data;
 };
 export async function getByGroupAndDiscipline(groupId, disciplineId) {
-  const res = await fetch(`/api/grades/group/${groupId}/discipline/${disciplineId}`);
-  console.log(res);
-  if (!res.ok) {
-    throw new Error("Ошибка ответа сервера");
-  }
 
-  return await res.json();
+  const res = await api.get(`${BASE_URL}/group/${groupId}/discipline/${disciplineId}`);
+  console.log(res.data);
+
+  return res.data;
 }

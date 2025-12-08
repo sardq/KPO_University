@@ -133,3 +133,36 @@ export const getDisciplineGroups = async (disciplineId) => {
     throw error;
   }
 };
+export const addTeachersToDiscipline = async (disciplineId, teacherIds) => {
+  try {
+    const promises = teacherIds.map(teacherId =>
+      api.post(`${BASE_URL}/${disciplineId}/teachers/${teacherId}`)
+    );
+    const responses = await Promise.all(promises);
+    return responses.map(r => r.data);
+  } catch (error) {
+    console.error("Error in addTeachersToDiscipline:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const removeTeacherFromDiscipline = async (disciplineId, teacherId) => {
+  try {
+    const response = await api.post(`${BASE_URL}/${disciplineId}/teachers/remove/${teacherId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in removeTeacherFromDiscipline:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getDisciplinesTeacher = async (teacherId) => {
+  try {
+    const response = await api.get(`${BASE_URL}/teacher/${teacherId}`);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getDisciplineTeachers:", error.response?.data || error.message);
+    throw error;
+  }
+};

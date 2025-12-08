@@ -5,6 +5,7 @@ import { Card, Table, Button, Form, Modal, Alert } from "react-bootstrap";
 import * as disciplineActions from "./service/disciplineActions";
 import * as groupActions from "./service/groupActions";
 import * as gradeActions from "./service/gradeActions";
+import * as userActions from "./service/userActions";
 import * as exerciseActions from "./service/exerciseActions";
 
 const JournalPanel = () => {
@@ -15,7 +16,9 @@ const JournalPanel = () => {
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
   const [exercises, setExercises] = useState([]);
-
+  const [teacherId, setTeacherId] = useState(null);
+  const [gradeComment, setGradeComment] = useState("");
+  const [editingGradeId, setEditingGradeId] = useState(null);
   const [grades, setGrades] = useState([]); 
   const [selectedCell, setSelectedCell] = useState(null); 
   const [showGradeModal, setShowGradeModal] = useState(false);
@@ -28,16 +31,32 @@ const JournalPanel = () => {
   const [showModal, setShowModal] = useState(false);
   const [exerciseForm, setExerciseForm] = useState({ date: "", description: "" });
   const [formError, setFormError] = useState("");
+  useEffect(() => {
+  const load = async () => {
+    const user = await userActions.getMe();
+    console.log(user);
+    if (user.role !== "TEACHER") {
+      navigate("/teacherHome");
+      return;
+    }
 
+    setTeacherId(user.id);  
+  };
+
+  load();
+}, [navigate]);
   useEffect(() => {
     if (role !== "TEACHER") navigate("/teacherHome");
-
     const loadDisciplines = async () => {
-      const data = await disciplineActions.getAllDisciplines();
+      if (teacherId != null){
+      const data = await disciplineActions.getDisciplinesTeacher(teacherId);
+      console.log(data);
       setDisciplines(data);
+      }
+    
     };
     loadDisciplines();
-  }, [role, navigate]);
+  }, [role, navigate, teacherId]);
 
   useEffect(() => {
     if (!selectedDiscipline) {
@@ -241,19 +260,24 @@ const JournalPanel = () => {
   key={ex.id}
   style={{ cursor: "pointer", textAlign: "center" }}
   onClick={() => {
+    const g = grades.find(gr => gr.studentId === st.id && gr.exerciseId === ex.id);
+
     setSelectedCell({ studentId: st.id, exerciseId: ex.id });
-    const existing = grades.find(
-      g => g.studentId === st.id && g.exerciseId === ex.id
-    );
-    setGradeValue(existing ? existing.value : "");
+
+    if (g) {
+      setGradeValue(g.value);
+      setGradeComment(g.description || "");
+      setEditingGradeId(g.id); 
+    } else {
+      setGradeValue("");
+      setGradeComment("");
+      setEditingGradeId(null); 
+    }
+
     setShowGradeModal(true);
   }}
 >
-  {
-    grades.find(g => g.studentId === st.id && g.exerciseId === ex.id)
-      ? grades.find(g => g.studentId === st.id && g.exerciseId === ex.id).value
-      : "-"
-  }
+  {grades.find(g => g.studentId === st.id && g.exerciseId === ex.id)?.value || "-"}
 </td>
                       ))}
                     </tr>
@@ -301,11 +325,13 @@ const JournalPanel = () => {
       </Modal>
       <Modal show={showGradeModal} onHide={() => setShowGradeModal(false)}>
   <Modal.Header closeButton>
-    <Modal.Title>Выставить оценку</Modal.Title>
+    <Modal.Title>
+      {editingGradeId ? "Редактирование оценки" : "Выставить оценку"}
+    </Modal.Title>
   </Modal.Header>
 
   <Modal.Body>
-    <Form.Group>
+    <Form.Group className="mb-3">
       <Form.Label>Оценка / статус</Form.Label>
       <Form.Select
         value={gradeValue}
@@ -321,12 +347,40 @@ const JournalPanel = () => {
         <option value="УП">УП – уважительная причина</option>
       </Form.Select>
     </Form.Group>
+
+    <Form.Group>
+      <Form.Label>Комментарий (необязательно)</Form.Label>
+      <Form.Control
+        as="textarea"
+        rows={3}
+        value={gradeComment}
+        onChange={e => setGradeComment(e.target.value)}
+      />
+    </Form.Group>
   </Modal.Body>
 
   <Modal.Footer>
+    {editingGradeId && (
+      <Button
+        variant="danger"
+        onClick={async () => {
+          await gradeActions.deleteGrade(editingGradeId);
+
+          setGrades(prev =>
+            prev.filter(g => g.id !== editingGradeId)
+          );
+
+          setShowGradeModal(false);
+        }}
+      >
+        Удалить
+      </Button>
+    )}
+
     <Button variant="secondary" onClick={() => setShowGradeModal(false)}>
       Отмена
     </Button>
+
     <Button
       variant="primary"
       onClick={async () => {
@@ -334,29 +388,32 @@ const JournalPanel = () => {
 
         const { studentId, exerciseId } = selectedCell;
 
-        // API сохранения
-        const savedGrade = await gradeActions.createGrade({
-          studentId,
-          exerciseId,
-          value: gradeValue
-        });
+        let saved;
 
-        // обновляем таблицу локально
-        setGrades(prev => {
-          const existing = prev.find(
-            g => g.studentId === studentId && g.exerciseId === exerciseId
+        if (editingGradeId) {
+          // UPDATE
+          saved = await gradeActions.updateGrade(editingGradeId, {
+            id: editingGradeId,
+            studentId,
+            exerciseId,
+            value: gradeValue,
+            description: gradeComment
+          });
+
+          setGrades(prev =>
+            prev.map(g => (g.id === editingGradeId ? saved : g))
           );
+        } else {
+          // CREATE
+          saved = await gradeActions.createGrade({
+            studentId,
+            exerciseId,
+            value: gradeValue,
+            description: gradeComment
+          });
 
-          if (existing) {
-            return prev.map(g =>
-              g.studentId === studentId && g.exerciseId === exerciseId
-                ? savedGrade
-                : g
-            );
-          }
-
-          return [...prev, savedGrade];
-        });
+          setGrades(prev => [...prev, saved]);
+        }
 
         setShowGradeModal(false);
       }}
@@ -365,6 +422,7 @@ const JournalPanel = () => {
     </Button>
   </Modal.Footer>
 </Modal>
+
     </div>
   );
 };

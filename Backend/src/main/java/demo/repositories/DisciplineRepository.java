@@ -60,4 +60,11 @@ public interface DisciplineRepository extends CrudRepository<DisciplineEntity, L
                 WHERE d.id = :id
             """)
     Optional<DisciplineEntity> findByIdWithGroups(@Param("id") Long id);
+
+    @Query("""
+            SELECT d FROM DisciplineEntity d
+            JOIN d.teachers t
+            WHERE t.id = :teacherId
+            """)
+    List<DisciplineEntity> findByTeacherId(@Param("teacherId") Long teacherId);
 }
