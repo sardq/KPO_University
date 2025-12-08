@@ -69,6 +69,13 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>,
     List<UserEntity> findByGroupId(@Param("groupId") Long groupId);
 
     @Query("""
+            SELECT DISTINCT t FROM DisciplineEntity d
+            JOIN d.teachers t
+            WHERE d.id = :disciplineId
+            """)
+    List<UserEntity> findTeachersByDisciplineId(@Param("disciplineId") Long disciplineId);
+
+    @Query("""
             SELECT u FROM UserEntity u
             WHERE EXISTS (
                 SELECT 1 FROM GroupEntity g

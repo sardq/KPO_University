@@ -5,6 +5,8 @@ import demo.dto.DisciplineDto;
 import demo.models.DisciplineEntity;
 import demo.models.GroupEntity;
 import demo.repositories.GroupRepository;
+import demo.repositories.UserRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,12 +18,15 @@ import static org.mockito.Mockito.*;
 class DisciplineMapperTest {
 
     private GroupRepository groupRepository;
+    private UserRepository userRepository;
     private DisciplineMapper disciplineMapper;
 
     @BeforeEach
     void setUp() {
         groupRepository = mock(GroupRepository.class);
-        disciplineMapper = new DisciplineMapper(groupRepository);
+        userRepository = mock(UserRepository.class);
+
+        disciplineMapper = new DisciplineMapper(groupRepository, userRepository);
     }
 
     @Test

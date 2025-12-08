@@ -171,4 +171,41 @@ class UserRepositoryTest {
         assertEquals(5L, count);
         verify(userRepository).count();
     }
+
+    @Test
+    void testFindTeachersByDisciplineId() {
+        Long disciplineId = 1L;
+
+        UserEntity teacher1 = new UserEntity();
+        teacher1.setId(10L);
+        teacher1.setRole(UserRole.TEACHER);
+
+        UserEntity teacher2 = new UserEntity();
+        teacher2.setId(11L);
+        teacher2.setRole(UserRole.TEACHER);
+
+        List<UserEntity> expected = List.of(teacher1, teacher2);
+
+        when(userRepository.findTeachersByDisciplineId(disciplineId)).thenReturn(expected);
+
+        List<UserEntity> result = userRepository.findTeachersByDisciplineId(disciplineId);
+
+        assertEquals(2, result.size());
+        assertEquals(UserRole.TEACHER, result.get(0).getRole());
+        assertEquals(UserRole.TEACHER, result.get(1).getRole());
+        verify(userRepository).findTeachersByDisciplineId(disciplineId);
+    }
+
+    @Test
+    void testFindTeachersByDisciplineId_NoTeachers() {
+        Long disciplineId = 2L;
+
+        when(userRepository.findTeachersByDisciplineId(disciplineId)).thenReturn(List.of());
+
+        List<UserEntity> result = userRepository.findTeachersByDisciplineId(disciplineId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(userRepository).findTeachersByDisciplineId(disciplineId);
+    }
 }

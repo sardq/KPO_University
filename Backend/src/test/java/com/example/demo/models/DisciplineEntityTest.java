@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import demo.models.DisciplineEntity;
 import demo.models.GroupEntity;
+import demo.models.UserEntity;
+import demo.models.UserRole;
 
 import org.junit.jupiter.api.BeforeEach;
 import jakarta.validation.Validation;
@@ -165,4 +167,65 @@ class DisciplineEntityTest {
         assertTrue(groupA.getDisciplines().contains(math));
     }
 
+    @Test
+    void testTeachersRelationship() {
+        DisciplineEntity discipline = new DisciplineEntity("Mathematics");
+
+        UserEntity teacher1 = new UserEntity();
+        teacher1.setId(1L);
+        teacher1.setRole(UserRole.TEACHER);
+
+        UserEntity teacher2 = new UserEntity();
+        teacher2.setId(2L);
+        teacher2.setRole(UserRole.TEACHER);
+
+        Set<UserEntity> teachers = new HashSet<>();
+        teachers.add(teacher1);
+        teachers.add(teacher2);
+
+        discipline.setTeachers(teachers);
+
+        assertEquals(2, discipline.getTeachers().size());
+        assertTrue(discipline.getTeachers().contains(teacher1));
+        assertTrue(discipline.getTeachers().contains(teacher2));
+    }
+
+    @Test
+    void testTeachersRelationship_EmptySet() {
+        DisciplineEntity discipline = new DisciplineEntity("Physics");
+
+        discipline.setTeachers(new HashSet<>());
+
+        assertNotNull(discipline.getTeachers());
+        assertTrue(discipline.getTeachers().isEmpty());
+    }
+
+    @Test
+    void testTeachersRelationship_NullSet() {
+        DisciplineEntity discipline = new DisciplineEntity("Chemistry");
+
+        discipline.setTeachers(null);
+
+        assertNull(discipline.getTeachers());
+    }
+
+    @Test
+    void testTeachersRelationship_AddAndRemove() {
+        DisciplineEntity discipline = new DisciplineEntity("Biology");
+        Set<UserEntity> teachers = new HashSet<>();
+        discipline.setTeachers(teachers);
+
+        UserEntity teacher = new UserEntity();
+        teacher.setId(1L);
+        teacher.setRole(UserRole.TEACHER);
+
+        discipline.getTeachers().add(teacher);
+
+        assertEquals(1, discipline.getTeachers().size());
+        assertTrue(discipline.getTeachers().contains(teacher));
+
+        discipline.getTeachers().remove(teacher);
+
+        assertTrue(discipline.getTeachers().isEmpty());
+    }
 }

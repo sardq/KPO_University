@@ -4,6 +4,8 @@ import { AuthContent } from "./AuthContent";
 import { Card, Table, Button, Form, Modal, Alert } from "react-bootstrap";
 import * as disciplineActions from "./service/disciplineActions";
 import * as groupActions from "./service/groupActions";
+import * as gradeActions from "./service/gradeActions";
+import * as userActions from "./service/userActions";
 import * as exerciseActions from "./service/exerciseActions";
 
 const JournalPanel = () => {
@@ -14,6 +16,13 @@ const JournalPanel = () => {
   const [groups, setGroups] = useState([]);
   const [students, setStudents] = useState([]);
   const [exercises, setExercises] = useState([]);
+  const [teacherId, setTeacherId] = useState(null);
+  const [gradeComment, setGradeComment] = useState("");
+  const [editingGradeId, setEditingGradeId] = useState(null);
+  const [grades, setGrades] = useState([]); 
+  const [selectedCell, setSelectedCell] = useState(null); 
+  const [showGradeModal, setShowGradeModal] = useState(false);
+  const [gradeValue, setGradeValue] = useState("");
 
   const [selectedDiscipline, setSelectedDiscipline] = useState("");
   const [selectedGroup, setSelectedGroup] = useState("");
@@ -22,19 +31,33 @@ const JournalPanel = () => {
   const [showModal, setShowModal] = useState(false);
   const [exerciseForm, setExerciseForm] = useState({ date: "", description: "" });
   const [formError, setFormError] = useState("");
+  useEffect(() => {
+  const load = async () => {
+    const user = await userActions.getMe();
+    console.log(user);
+    if (user.role !== "TEACHER") {
+      navigate("/teacherHome");
+      return;
+    }
 
-  // Загрузка дисциплин
+    setTeacherId(user.id);  
+  };
+
+  load();
+}, [navigate]);
   useEffect(() => {
     if (role !== "TEACHER") navigate("/teacherHome");
-
     const loadDisciplines = async () => {
-      const data = await disciplineActions.getAllDisciplines();
+      if (teacherId != null){
+      const data = await disciplineActions.getDisciplinesTeacher(teacherId);
+      console.log(data);
       setDisciplines(data);
+      }
+    
     };
     loadDisciplines();
-  }, [role, navigate]);
+  }, [role, navigate, teacherId]);
 
-  // Загрузка групп при выборе дисциплины
   useEffect(() => {
     if (!selectedDiscipline) {
       setGroups([]);
@@ -54,7 +77,6 @@ const JournalPanel = () => {
     loadGroups();
   }, [selectedDiscipline]);
 
-  // Загрузка студентов и занятий при выборе группы
   useEffect(() => {
     if (!selectedGroup || !selectedDiscipline) {
       setStudents([]);
@@ -69,16 +91,18 @@ const JournalPanel = () => {
 
     const loadExercises = async () => {
       const data = await exerciseActions.getByDisciplineAndGroup(selectedDiscipline, selectedGroup);
-      // Сортировка по дате и времени
       const sorted = data.sort((a, b) => new Date(a.date) - new Date(b.date));
       setExercises(sorted);
     };
-
+    const loadGrades = async () => {
+    const data = await gradeActions.getByGroupAndDiscipline(selectedGroup, selectedDiscipline);
+    setGrades(data);
+    };
+    loadGrades();
     loadStudents();
     loadExercises();
   }, [selectedGroup, selectedDiscipline]);
 
-  // Открытие модалки для создания нового занятия
   const handleCreateExercise = () => {
     setCurrentExercise(null);
     setExerciseForm({ date: "", description: "" });
@@ -86,19 +110,17 @@ const JournalPanel = () => {
     setShowModal(true);
   };
 
-  // Открытие модалки для редактирования существующего занятия
   const openModal = (exercise) => {
     setCurrentExercise(exercise);
     setExerciseForm({
       id: exercise.id,
-      date: exercise.date.slice(0,16), // для input datetime-local
+      date: exercise.date.slice(0,16), 
       description: exercise.description,
     });
     setFormError("");
     setShowModal(true);
   };
 
-  // Сохранение или обновление занятия
   const handleSaveExercise = async () => {
     setFormError("");
 
@@ -160,7 +182,6 @@ const JournalPanel = () => {
     }
   };
 
-  // Удаление занятия
   const handleDeleteExercise = async () => {
     if (!currentExercise) return;
 
@@ -233,7 +254,29 @@ const JournalPanel = () => {
                     <tr key={st.id}>
                       <td>{st.lastName} {st.firstName}</td>
                       {exercises.map(ex => (
-                        <td key={ex.id}>-</td>
+                        <td
+  key={ex.id}
+  style={{ cursor: "pointer", textAlign: "center" }}
+  onClick={() => {
+    const g = grades.find(gr => gr.studentId === st.id && gr.exerciseId === ex.id);
+
+    setSelectedCell({ studentId: st.id, exerciseId: ex.id });
+
+    if (g) {
+      setGradeValue(g.value);
+      setGradeComment(g.description || "");
+      setEditingGradeId(g.id); 
+    } else {
+      setGradeValue("");
+      setGradeComment("");
+      setEditingGradeId(null); 
+    }
+
+    setShowGradeModal(true);
+  }}
+>
+  {grades.find(g => g.studentId === st.id && g.exerciseId === ex.id)?.value || "-"}
+</td>
                       ))}
                     </tr>
                   ))}
@@ -278,6 +321,104 @@ const JournalPanel = () => {
           <Button variant="primary" onClick={handleSaveExercise}>Сохранить</Button>
         </Modal.Footer>
       </Modal>
+      <Modal show={showGradeModal} onHide={() => setShowGradeModal(false)}>
+  <Modal.Header closeButton>
+    <Modal.Title>
+      {editingGradeId ? "Редактирование оценки" : "Выставить оценку"}
+    </Modal.Title>
+  </Modal.Header>
+
+  <Modal.Body>
+    <Form.Group className="mb-3">
+      <Form.Label>Оценка / статус</Form.Label>
+      <Form.Select
+        value={gradeValue}
+        onChange={e => setGradeValue(e.target.value)}
+      >
+        <option value="">Не выбрано</option>
+        <option value="5">5</option>
+        <option value="4">4</option>
+        <option value="3">3</option>
+        <option value="2">2</option>
+        <option value="Б">Б – болеет</option>
+        <option value="О">О – отсутствовал</option>
+        <option value="УП">УП – уважительная причина</option>
+      </Form.Select>
+    </Form.Group>
+
+    <Form.Group>
+      <Form.Label>Комментарий (необязательно)</Form.Label>
+      <Form.Control
+        as="textarea"
+        rows={3}
+        value={gradeComment}
+        onChange={e => setGradeComment(e.target.value)}
+      />
+    </Form.Group>
+  </Modal.Body>
+
+  <Modal.Footer>
+    {editingGradeId && (
+      <Button
+        variant="danger"
+        onClick={async () => {
+          await gradeActions.deleteGrade(editingGradeId);
+
+          setGrades(prev =>
+            prev.filter(g => g.id !== editingGradeId)
+          );
+
+          setShowGradeModal(false);
+        }}
+      >
+        Удалить
+      </Button>
+    )}
+
+    <Button variant="secondary" onClick={() => setShowGradeModal(false)}>
+      Отмена
+    </Button>
+
+    <Button
+      variant="primary"
+      onClick={async () => {
+        if (!selectedCell) return;
+
+        const { studentId, exerciseId } = selectedCell;
+
+        let saved;
+
+        if (editingGradeId) {
+          saved = await gradeActions.updateGrade(editingGradeId, {
+            id: editingGradeId,
+            studentId,
+            exerciseId,
+            value: gradeValue,
+            description: gradeComment
+          });
+
+          setGrades(prev =>
+            prev.map(g => (g.id === editingGradeId ? saved : g))
+          );
+        } else {
+          saved = await gradeActions.createGrade({
+            studentId,
+            exerciseId,
+            value: gradeValue,
+            description: gradeComment
+          });
+
+          setGrades(prev => [...prev, saved]);
+        }
+
+        setShowGradeModal(false);
+      }}
+    >
+      Сохранить
+    </Button>
+  </Modal.Footer>
+</Modal>
+
     </div>
   );
 };

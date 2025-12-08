@@ -81,12 +81,13 @@ const UserPanel = () => {
   }, [state.search, state.usersPerPage, roleFilter]);
   const handleRoleFilterChange = (e) => {
   setRoleFilter(e.target.value);
-  getUsers(1);
 };
   useEffect(() => {
     getUsers(state.currentPage);
   }, [getUsers, state.currentPage]);
-
+  useEffect(() => {
+    getUsers(1);
+  }, [roleFilter]);
   const handleSearchChange = (e) => {
     setState(prev => ({ ...prev, search: e.target.value }));
   };
@@ -113,7 +114,7 @@ const UserPanel = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
-
+  
   const handleDeleteUser = async (userId, userEmail) => {
     try {
       await userActions.deleteUser(userId);
@@ -134,6 +135,7 @@ const UserPanel = () => {
       showToastMessage("Ошибка при удалении пользователя", "danger");
     }
   };
+
 
   const handleOpenCreateModal = () => {
     setFormData({

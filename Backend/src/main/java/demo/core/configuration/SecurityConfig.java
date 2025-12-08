@@ -43,11 +43,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login", "/register", "/reset-password",
                                 "/api/otp/**")
                         .permitAll()
-                        .requestMatchers("/api/users/**")
+                        .requestMatchers(HttpMethod.POST, "/api/users/**")
                         .hasRole("ADMIN")
-                        .requestMatchers("/api/disciplines/**", "/api/groups/**", "/api/exercises/**")
+                        .requestMatchers("/api/disciplines/**", "/api/groups/**", "/api/grades/**", "/api/exercises/**")
                         .hasAnyRole("TEACHER", "ADMIN")
-                        .requestMatchers("/api/user/me").authenticated()
+                        .requestMatchers("/api/user/me",
+                                "/api/users/me")
+                        .authenticated()
                         .anyRequest().authenticated());
         return http.build();
     }

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const EmailAuth = () => {
 
-    const { email, setEmail, setCheckedAdmin } = useContext(AuthContent);
+    const { email, setEmail } = useContext(AuthContent);
     const navigate = useNavigate();
   const onOtpSubmit = (otp) => {
         request(
@@ -18,7 +18,6 @@ const EmailAuth = () => {
             if(response.data.status === "Sucess")
             {
                 setEmail(null);
-                setCheckedAdmin(true);
                 navigate("/adminHome");
             }
         }).catch(error => {

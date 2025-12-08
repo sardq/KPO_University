@@ -124,7 +124,6 @@ class UserControllerTest {
         verify(service).delete(1L);
     }
 
-    // ----------- getCurrentUser() TESTS ------------
 
     @Test
     void testGetCurrentUserAuthenticated() {

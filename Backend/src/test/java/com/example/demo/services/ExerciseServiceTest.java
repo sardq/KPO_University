@@ -180,13 +180,12 @@ class ExerciseServiceTest {
         ExerciseDto updateDto = new ExerciseDto();
         updateDto.setDate("2024-01-16T11:00:00");
         updateDto.setDescription("Updated Exercise");
-        updateDto.setGroupId(2L); // Новый groupId
+        updateDto.setGroupId(2L); 
         updateDto.setDisciplineId(1L);
 
         doReturn(testExercise).when(exerciseService).get(exerciseId);
         when(groupRepository.findById(2L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(NotFoundException.class,
                 () -> exerciseService.update(exerciseId, updateDto));
         verify(groupRepository).findById(2L);
@@ -250,7 +249,7 @@ void create_WithValidData_ShouldCreateExercise() {
     dto.setGroupId(1L);
     dto.setDisciplineId(1L);
     dto.setDescription("Test Exercise");
-    dto.setDate("2024-01-15T10:00"); // Обязательная дата
+    dto.setDate("2024-01-15T10:00"); 
     
     ExerciseEntity savedEntity = new ExerciseEntity();
     savedEntity.setId(1L);

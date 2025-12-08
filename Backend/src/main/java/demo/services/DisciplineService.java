@@ -3,8 +3,11 @@ package demo.services;
 import demo.core.error.NotFoundException;
 import demo.models.DisciplineEntity;
 import demo.models.GroupEntity;
+import demo.models.UserEntity;
+import demo.models.UserRole;
 import demo.repositories.DisciplineRepository;
 import demo.repositories.GroupRepository;
+import demo.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.ArrayList;
@@ -28,12 +31,14 @@ public class DisciplineService {
     private final DisciplineRepository repository;
     private final DisciplineService self;
     private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
 
     public DisciplineService(DisciplineRepository repository, @Lazy DisciplineService self,
-            GroupRepository groupRepository) {
+            GroupRepository groupRepository, UserRepository userRepository) {
         this.repository = repository;
         this.self = self;
         this.groupRepository = groupRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -153,5 +158,34 @@ public class DisciplineService {
                 .orElseThrow(() -> new EntityNotFoundException("Discipline not found with id: " + disciplineId));
 
         return new ArrayList<>(discipline.getGroups());
+    }
+
+    @Transactional
+    public DisciplineEntity addTeacher(Long disciplineId, Long teacherId) {
+        DisciplineEntity discipline = self.get(disciplineId);
+        UserEntity teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new NotFoundException(UserEntity.class, teacherId));
+
+        if (!teacher.getRole().equals(UserRole.TEACHER)) {
+            throw new IllegalArgumentException("Пользователь не имеет роль TEACHER");
+        }
+
+        discipline.getTeachers().add(teacher);
+        return repository.save(discipline);
+    }
+
+    @Transactional
+    public DisciplineEntity removeTeacher(Long disciplineId, Long teacherId) {
+        DisciplineEntity discipline = self.get(disciplineId);
+        UserEntity teacher = userRepository.findById(teacherId)
+                .orElseThrow(() -> new NotFoundException(UserEntity.class, teacherId));
+
+        discipline.getTeachers().remove(teacher);
+        return repository.save(discipline);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DisciplineEntity> getDisciplinesByTeacher(Long teacherId) {
+        return repository.findByTeacherId(teacherId);
     }
 }

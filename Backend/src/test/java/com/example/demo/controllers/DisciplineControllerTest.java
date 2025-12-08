@@ -124,4 +124,103 @@ class DisciplineControllerTest {
         assertEquals(dto, result);
     }
 
+    @Test
+    void testAddTeacher() {
+        Long disciplineId = 1L;
+        Long teacherId = 10L;
+
+        DisciplineEntity discipline = new DisciplineEntity();
+        discipline.setId(disciplineId);
+        discipline.setName("Math");
+
+        DisciplineDto dto = new DisciplineDto();
+        dto.setId(disciplineId);
+        dto.setName("Math");
+
+        when(service.addTeacher(disciplineId, teacherId)).thenReturn(discipline);
+        when(mapper.toDto(discipline)).thenReturn(dto);
+
+        DisciplineDto result = controller.addTeacher(disciplineId, teacherId);
+
+        assertNotNull(result);
+        assertEquals(disciplineId, result.getId());
+        assertEquals("Math", result.getName());
+        verify(service).addTeacher(disciplineId, teacherId);
+        verify(mapper).toDto(discipline);
+    }
+
+    @Test
+    void testRemoveTeacher() {
+        Long disciplineId = 1L;
+        Long teacherId = 10L;
+
+        DisciplineEntity discipline = new DisciplineEntity();
+        discipline.setId(disciplineId);
+        discipline.setName("Physics");
+
+        DisciplineDto dto = new DisciplineDto();
+        dto.setId(disciplineId);
+        dto.setName("Physics");
+
+        when(service.removeTeacher(disciplineId, teacherId)).thenReturn(discipline);
+        when(mapper.toDto(discipline)).thenReturn(dto);
+
+        DisciplineDto result = controller.removeTeacher(disciplineId, teacherId);
+
+        assertNotNull(result);
+        assertEquals(disciplineId, result.getId());
+        assertEquals("Physics", result.getName());
+        verify(service).removeTeacher(disciplineId, teacherId);
+        verify(mapper).toDto(discipline);
+    }
+
+    @Test
+    void testGetDisciplinesByTeacher() {
+        Long teacherId = 10L;
+
+        DisciplineEntity discipline1 = new DisciplineEntity();
+        discipline1.setId(1L);
+        discipline1.setName("Math");
+
+        DisciplineEntity discipline2 = new DisciplineEntity();
+        discipline2.setId(2L);
+        discipline2.setName("Physics");
+
+        List<DisciplineEntity> disciplines = List.of(discipline1, discipline2);
+
+        DisciplineDto dto1 = new DisciplineDto();
+        dto1.setId(1L);
+        dto1.setName("Math");
+
+        DisciplineDto dto2 = new DisciplineDto();
+        dto2.setId(2L);
+        dto2.setName("Physics");
+
+        when(service.getDisciplinesByTeacher(teacherId)).thenReturn(disciplines);
+        when(mapper.toDto(discipline1)).thenReturn(dto1);
+        when(mapper.toDto(discipline2)).thenReturn(dto2);
+
+        List<DisciplineDto> result = controller.getDisciplinesByTeacher(teacherId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Math", result.get(0).getName());
+        assertEquals("Physics", result.get(1).getName());
+        verify(service).getDisciplinesByTeacher(teacherId);
+        verify(mapper, times(2)).toDto(any(DisciplineEntity.class));
+    }
+
+    @Test
+    void testGetDisciplinesByTeacher_EmptyList() {
+        Long teacherId = 10L;
+
+        when(service.getDisciplinesByTeacher(teacherId)).thenReturn(List.of());
+
+        List<DisciplineDto> result = controller.getDisciplinesByTeacher(teacherId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(service).getDisciplinesByTeacher(teacherId);
+        verify(mapper, never()).toDto(any());
+    }
 }

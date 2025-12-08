@@ -1,5 +1,6 @@
 package com.example.demo.models;
 
+import demo.models.GroupEntity;
 import demo.models.UserEntity;
 import demo.models.UserRole;
 import org.junit.jupiter.api.Test;
@@ -60,4 +61,49 @@ class UserEntityTest {
         assertEquals(user1.hashCode(), user2.hashCode());
     }
 
+    @Test
+    void testUserGroupRelationship() {
+        UserEntity student = new UserEntity();
+        student.setId(1L);
+
+        GroupEntity group = new GroupEntity();
+        group.setId(10L);
+        group.setName("Group A");
+
+        student.setGroup(group);
+
+        assertEquals(group, student.getGroup());
+        assertEquals(10L, student.getGroup().getId());
+        assertEquals("Group A", student.getGroup().getName());
+    }
+
+    @Test
+    void testUserGroupRelationship_Null() {
+        UserEntity student = new UserEntity();
+
+        student.setGroup(null);
+
+        assertNull(student.getGroup());
+    }
+
+    @Test
+    void testUserGroupRelationship_ChangeGroup() {
+        UserEntity student = new UserEntity();
+
+        GroupEntity group1 = new GroupEntity();
+        group1.setId(1L);
+        group1.setName("Group 1");
+
+        GroupEntity group2 = new GroupEntity();
+        group2.setId(2L);
+        group2.setName("Group 2");
+
+        student.setGroup(group1);
+
+        assertEquals(group1, student.getGroup());
+
+        student.setGroup(group2);
+
+        assertEquals(group2, student.getGroup());
+    }
 }

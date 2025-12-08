@@ -111,4 +111,28 @@ public class DisciplineController {
 
         return ResponseEntity.ok(groupDtos);
     }
+
+    @PostMapping("/{disciplineId}/teachers/{teacherId}")
+    public DisciplineDto addTeacher(
+            @PathVariable Long disciplineId,
+            @PathVariable Long teacherId) {
+
+        DisciplineEntity discipline = service.addTeacher(disciplineId, teacherId);
+        return modelMapper.toDto(discipline);
+    }
+
+    @PostMapping("/{disciplineId}/teachers/remove/{teacherId}")
+    public DisciplineDto removeTeacher(
+            @PathVariable Long disciplineId,
+            @PathVariable Long teacherId) {
+
+        DisciplineEntity discipline = service.removeTeacher(disciplineId, teacherId);
+        return modelMapper.toDto(discipline);
+    }
+
+    @GetMapping("/teacher/{teacherId}")
+    public List<DisciplineDto> getDisciplinesByTeacher(@PathVariable Long teacherId) {
+        List<DisciplineEntity> list = service.getDisciplinesByTeacher(teacherId);
+        return list.stream().map(modelMapper::toDto).toList();
+    }
 }

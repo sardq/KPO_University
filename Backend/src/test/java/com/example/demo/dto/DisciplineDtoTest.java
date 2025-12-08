@@ -97,4 +97,57 @@ class DisciplineDtoTest {
         disciplineDto.setId(Long.MAX_VALUE);
         assertEquals(Long.MAX_VALUE, disciplineDto.getId());
     }
+
+    @Test
+    void testTeacherIdsOperations() {
+        DisciplineDto dto = new DisciplineDto();
+
+        List<Long> teacherIds = Arrays.asList(1L, 2L, 3L, 4L);
+        dto.setTeacherIds(teacherIds);
+
+        assertEquals(teacherIds, dto.getTeacherIds());
+        assertEquals(4, dto.getTeacherIds().size());
+        assertTrue(dto.getTeacherIds().contains(1L));
+
+        List<Long> emptyList = Arrays.asList();
+        dto.setTeacherIds(emptyList);
+        assertTrue(dto.getTeacherIds().isEmpty());
+
+        dto.setTeacherIds(null);
+        assertNull(dto.getTeacherIds());
+    }
+
+    @Test
+    void testAllGettersAndSettersTogether() {
+        DisciplineDto dto = new DisciplineDto();
+
+        dto.setId(1L);
+        dto.setName("Computer Science");
+        dto.setGroupsCount(3);
+        dto.setGroupIds(Arrays.asList(10L, 11L, 12L));
+        dto.setTeacherIds(Arrays.asList(20L, 21L));
+
+        assertEquals(1L, dto.getId());
+        assertEquals("Computer Science", dto.getName());
+        assertEquals(3, dto.getGroupsCount());
+        assertEquals(Arrays.asList(10L, 11L, 12L), dto.getGroupIds());
+        assertEquals(Arrays.asList(20L, 21L), dto.getTeacherIds());
+    }
+
+    @Test
+    void testEqualsAndHashCode_WithTeacherIds() {
+        DisciplineDto dto1 = new DisciplineDto();
+        dto1.setId(1L);
+        dto1.setName("Math");
+        dto1.setTeacherIds(Arrays.asList(1L, 2L));
+
+        DisciplineDto dto2 = new DisciplineDto();
+        dto2.setId(1L);
+        dto2.setName("Math");
+        dto2.setTeacherIds(Arrays.asList(1L, 2L));
+
+        assertEquals(dto1.getId(), dto2.getId());
+        assertEquals(dto1.getName(), dto2.getName());
+        assertEquals(dto1.getTeacherIds(), dto2.getTeacherIds());
+    }
 }

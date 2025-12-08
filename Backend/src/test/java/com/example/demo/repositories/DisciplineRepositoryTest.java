@@ -146,4 +146,39 @@ class DisciplineRepositoryTest {
         assertEquals(1L, found.get().getId());
         verify(disciplineRepository).findByIdWithGroups(1L);
     }
+
+    @Test
+    void testFindByTeacherId() {
+        Long teacherId = 5L;
+
+        DisciplineEntity math = new DisciplineEntity("Mathematics");
+        math.setId(1L);
+
+        DisciplineEntity physics = new DisciplineEntity("Physics");
+        physics.setId(2L);
+
+        List<DisciplineEntity> expected = List.of(math, physics);
+
+        when(disciplineRepository.findByTeacherId(teacherId)).thenReturn(expected);
+
+        List<DisciplineEntity> result = disciplineRepository.findByTeacherId(teacherId);
+
+        assertEquals(2, result.size());
+        assertEquals("Mathematics", result.get(0).getName());
+        assertEquals("Physics", result.get(1).getName());
+        verify(disciplineRepository).findByTeacherId(teacherId);
+    }
+
+    @Test
+    void testFindByTeacherId_EmptyResult() {
+        Long teacherId = 999L;
+
+        when(disciplineRepository.findByTeacherId(teacherId)).thenReturn(List.of());
+
+        List<DisciplineEntity> result = disciplineRepository.findByTeacherId(teacherId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(disciplineRepository).findByTeacherId(teacherId);
+    }
 }

@@ -32,6 +32,4 @@ public interface ExerciseRepository extends CrudRepository<ExerciseEntity, Long>
     List<ExerciseEntity> findByDisciplineIdAndGroupId(@Param("disciplineId") Long disciplineId,
             @Param("groupId") Long groupId);
 
-    
-
 }

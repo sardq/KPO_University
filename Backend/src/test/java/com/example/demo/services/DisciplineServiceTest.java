@@ -5,6 +5,7 @@ import demo.models.DisciplineEntity;
 import demo.models.GroupEntity;
 import demo.repositories.DisciplineRepository;
 import demo.repositories.GroupRepository;
+import demo.repositories.UserRepository;
 import demo.services.DisciplineService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,8 @@ class DisciplineServiceTest {
 
     @Mock
     private DisciplineRepository disciplineRepository;
-
+    @Mock
+    private UserRepository userRepository;
     @Mock
     private GroupRepository groupRepository;
 
@@ -297,4 +299,38 @@ class DisciplineServiceTest {
         verify(disciplineRepository, never()).save(any());
     }
 
+    @Test
+    void testGetDisciplinesByTeacher() {
+        Long teacherId = 10L;
+
+        DisciplineEntity math = new DisciplineEntity("Mathematics");
+        math.setId(1L);
+
+        DisciplineEntity physics = new DisciplineEntity("Physics");
+        physics.setId(2L);
+
+        List<DisciplineEntity> disciplines = List.of(math, physics);
+
+        when(disciplineRepository.findByTeacherId(teacherId)).thenReturn(disciplines);
+
+        List<DisciplineEntity> result = disciplineService.getDisciplinesByTeacher(teacherId);
+
+        assertEquals(2, result.size());
+        assertEquals("Mathematics", result.get(0).getName());
+        assertEquals("Physics", result.get(1).getName());
+        verify(disciplineRepository).findByTeacherId(teacherId);
+    }
+
+    @Test
+    void testGetDisciplinesByTeacher_EmptyList() {
+        Long teacherId = 999L;
+
+        when(disciplineRepository.findByTeacherId(teacherId)).thenReturn(List.of());
+
+        List<DisciplineEntity> result = disciplineService.getDisciplinesByTeacher(teacherId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(disciplineRepository).findByTeacherId(teacherId);
+    }
 }

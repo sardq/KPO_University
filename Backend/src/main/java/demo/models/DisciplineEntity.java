@@ -20,6 +20,9 @@ public class DisciplineEntity extends BaseEntity {
 
     @ManyToMany(mappedBy = "disciplines")
     private Set<GroupEntity> groups = new HashSet<>();
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "discipline_teachers", joinColumns = @JoinColumn(name = "discipline_id"), inverseJoinColumns = @JoinColumn(name = "teacher_id"))
+    private Set<UserEntity> teachers = new HashSet<>();
 
     public DisciplineEntity() {
     }
@@ -30,6 +33,14 @@ public class DisciplineEntity extends BaseEntity {
 
     public String getName() {
         return name;
+    }
+
+    public Set<UserEntity> getTeachers() {
+        return teachers;
+    }
+
+    public void setTeachers(Set<UserEntity> teachers) {
+        this.teachers = teachers;
     }
 
     public void setName(String name) {
