@@ -9,6 +9,7 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 
 import demo.dto.JournalReportDto;
+import demo.exceptions.GenerateException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -78,7 +79,7 @@ public class JournalReportGeneratorService {
             document.add(signature);
 
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка генерации PDF", e);
+            throw new GenerateException("Ошибка генерации PDF", e);
         } finally {
             document.close();
         }

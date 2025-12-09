@@ -354,14 +354,14 @@ class ExerciseServiceTest {
         doReturn(existingExercise).when(exerciseService).get(exerciseId);
 
         when(exerciseRepository.findByDateAndGroupIdAndDisciplineId(
-                eq(newDate), eq(testGroup.getId()), eq(testDiscipline.getId())))
+                newDate, testGroup.getId(), testDiscipline.getId()))
                 .thenReturn(Optional.of(duplicateExercise));
 
         assertThrows(IllegalArgumentException.class,
                 () -> exerciseService.update(exerciseId, updateDto));
 
         verify(exerciseRepository).findByDateAndGroupIdAndDisciplineId(
-                eq(newDate), eq(testGroup.getId()), eq(testDiscipline.getId()));
+                newDate, testGroup.getId(), testDiscipline.getId());
         verify(exerciseRepository, never()).save(any());
     }
 

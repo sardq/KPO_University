@@ -126,11 +126,10 @@ public class UserService {
         }
         checkEmail(null, entity.getEmail());
         String generatedPassword = generateRandomPassword(10);
-        // entity.setPassword(passwordEncoder.encode(generatedPassword));
-        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+        entity.setPassword(passwordEncoder.encode(generatedPassword));
         try {
-            // emailService.sendPasswordEmail(entity.getEmail(), entity.getLogin(),
-            // generatedPassword);
+            emailService.sendPasswordEmail(entity.getEmail(), entity.getLogin(),
+                    generatedPassword);
         } catch (Exception e) {
             logger.error("Ошибка отправки пароля на почту: {}", e.getMessage());
         }
@@ -255,7 +254,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserEntity> searchStudentsWithoutGroup(String search, int page, int size) {
-        logger.info("Поиск студентов без группы: search={}, page={}, size={}", search, page, size);
+        logger.info("Поиск студентов без группы: page={}, size={}", page, size);
         var result = repository.searchStudentsWithoutGroup(
                 search != null ? search : "",
                 PageRequest.of(page, size));

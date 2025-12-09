@@ -95,7 +95,7 @@ public class ExerciseService {
                     date, dto.getGroupId(), dto.getDisciplineId());
             if (existingExercise.isPresent()) {
                 throw new IllegalArgumentException(
-                        String.format("Занятие с такой датой уже существует для группы и дисциплины"));
+                        "Занятие с такой датой уже существует для группы и дисциплины");
             }
         }
 

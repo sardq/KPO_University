@@ -53,26 +53,28 @@ public class DemoApplication implements CommandLineRunner {
                     UserRole.ADMIN);
             admin.setRole(UserRole.ADMIN);
             userService.create(admin);
-
+            String defpsw = "12345";
             log.info("Create default users values");
             userService
                     .create(new UserEntity("o.oleg", "user@user.user", "useruser", "Олегов", "Олег", UserRole.STUDENT));
             final var u2 = userService
-                    .create(new UserEntity("i.ivan", "jbsdk@asd", "12345", "Иванов", "Иван", UserRole.TEACHER));
+                    .create(new UserEntity("i.ivan", "jbsdk@asd", defpsw, "Иванов", "Иван", UserRole.TEACHER));
             final var u3 = userService.create(
-                    new UserEntity("a.anna", "safasf@ufsfser.user", "12345", "Аннова", "Анна", UserRole.STUDENT));
+                    new UserEntity("a.anna", "safasf@ufsfser.user", defpsw, "Аннова", "Анна", UserRole.STUDENT));
             final var u4 = userService.create(
-                    new UserEntity("a.anna2", "safasf1@ufsfser.user", "12345", "Фамилия", "Анна", UserRole.STUDENT));
+                    new UserEntity("a.anna2", "safasf1@ufsfser.user", defpsw, "Фамилия", "Анна", UserRole.STUDENT));
             final var u5 = userService.create(
-                    new UserEntity("a.anna3", "safasf2@ufsfser.user", "12345", "ААААААААА", "Анна", UserRole.STUDENT));
+                    new UserEntity("a.anna3", "safasf2@ufsfser.user", defpsw, "ААААААААА", "Анна", UserRole.STUDENT));
             userService.create(
-                    new UserEntity("a.anna4", "safasf3@ufsfser.user", "12345", "Фамилия", "Анна",
+                    new UserEntity("a.anna4", "safasf3@ufsfser.user",
+                            defpsw, "Фамилия", "Анна",
                             UserRole.STUDENT));
             final var u7 = userService.create(
-                    new UserEntity("a.anna5", "safas4f@ufsfser.user", "12345", "Кто-то", "Анна",
+                    new UserEntity("a.anna5", "safas4f@ufsfser.user",
+                            defpsw, "Кто-то", "Анна",
                             UserRole.STUDENT));
             userService
-                    .create(new UserEntity("m.max", "asfasf@asd", "123456", "Максимов", "Макс", UserRole.TEACHER));
+                    .create(new UserEntity("m.max", "asfasf@asd", defpsw, "Максимов", "Макс", UserRole.TEACHER));
 
             log.info("Create default groups");
             final var g1 = groupService.create(new GroupEntity("ПМИ-21-1"));

@@ -1,6 +1,7 @@
 package demo.services;
 
 import demo.dto.JournalReportDto;
+import demo.exceptions.StorageException;
 import io.minio.*;
 import lombok.SneakyThrows;
 
@@ -23,7 +24,7 @@ public class JournalReportControlService {
         this.minioClient = minioClient;
     }
 
-    private final String BUCKET_NAME = "protocols";
+    private static final String bucket_name = "protocols";
 
     public Long saveProtocol(JournalReportDto dto) {
         logger.info("Попытка сохранить протокол");
@@ -38,13 +39,13 @@ public class JournalReportControlService {
 
             minioClient.putObject(PutObjectArgs.builder()
                     .stream(new ByteArrayInputStream(pdf), pdf.length, -1)
-                    .bucket(BUCKET_NAME)
+                    .bucket(bucket_name)
                     .object(filename)
                     .contentType("application/pdf")
                     .build());
 
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка при загрузке файла в MinIO", e);
+            throw new StorageException("Ошибка при загрузке файла в MinIO", e);
         }
         return dto.getId();
     }
@@ -53,15 +54,14 @@ public class JournalReportControlService {
         String filename = "protocol_" + id + ".pdf";
 
         try (InputStream is = minioClient.getObject(GetObjectArgs.builder()
-                .bucket(BUCKET_NAME)
+                .bucket(bucket_name)
                 .object(filename)
                 .build())) {
 
             return is.readAllBytes();
 
         } catch (Exception e) {
-            logger.error("Oшибка при получении файла из MinIO", e);
-            throw new RuntimeException("Ошибка при получении файла из MinIO", e);
+            throw new StorageException("Ошибка при получении файла из MinIO", e);
         }
     }
 
@@ -69,17 +69,16 @@ public class JournalReportControlService {
     private void createBucketIfNotExists() {
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
-                    .bucket(BUCKET_NAME)
+                    .bucket(bucket_name)
                     .build());
 
             if (!found) {
                 minioClient.makeBucket(MakeBucketArgs.builder()
-                        .bucket(BUCKET_NAME)
+                        .bucket(bucket_name)
                         .build());
             }
         } catch (Exception e) {
-            logger.error("Ошибка при проверке/создании бакета", e);
-            throw new RuntimeException("Ошибка при проверке/создании бакета", e);
+            throw new StorageException("Ошибка при проверке/создании бакета", e);
         }
     }
 

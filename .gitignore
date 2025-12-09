@@ -26,5 +26,5 @@ Backend/.gradle
 Backend/.idea
 Backend/.vscode
 Backend/.env
-
+/logs
 
