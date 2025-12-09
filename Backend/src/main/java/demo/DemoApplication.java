@@ -100,134 +100,106 @@ public class DemoApplication implements CommandLineRunner {
             disciplineService.addTeacher(d2.getId(), u2.getId());
             disciplineService.addTeacher(d3.getId(), u2.getId());
             log.info("Create default exercises");
-            final var ex1 = exerciseService.create(new ExerciseDto() {
-                {
-                    setDate("2024-03-01T09:00");
-                    setGroupId(g1.getId());
-                    setDisciplineId(d1.getId());
-                    setDescription("Вводная лекция");
-                }
-            });
+            ExerciseDto ex1Dto = new ExerciseDto();
+            ex1Dto.setDate("2024-03-01T09:00");
+            ex1Dto.setGroupId(g1.getId());
+            ex1Dto.setDisciplineId(d1.getId());
+            ex1Dto.setDescription("Вводная лекция");
+            final var ex1 = exerciseService.create(ex1Dto);
 
-            final var ex2 = exerciseService.create(new ExerciseDto() {
-                {
-                    setDate("2024-03-02T10:00");
-                    setGroupId(g1.getId());
-                    setDisciplineId(d1.getId());
-                    setDescription("Практическое занятие");
-                }
-            });
+            ExerciseDto ex2Dto = new ExerciseDto();
+            ex2Dto.setDate("2024-03-02T10:00");
+            ex2Dto.setGroupId(g1.getId());
+            ex2Dto.setDisciplineId(d1.getId());
+            ex2Dto.setDescription("Практическое занятие");
+            final var ex2 = exerciseService.create(ex2Dto);
 
-            final var ex3 = exerciseService.create(new ExerciseDto() {
-                {
-                    setDate("2024-03-03T11:00");
-                    setGroupId(g2.getId());
-                    setDisciplineId(d2.getId());
-                    setDescription("Лекция по алгоритмам");
-                }
-            });
+            ExerciseDto ex3Dto = new ExerciseDto();
+            ex3Dto.setDate("2024-03-03T11:00");
+            ex3Dto.setGroupId(g2.getId());
+            ex3Dto.setDisciplineId(d2.getId());
+            ex3Dto.setDescription("Лекция по алгоритмам");
+            final var ex3 = exerciseService.create(ex3Dto);
 
-            final var ex4 = exerciseService.create(new ExerciseDto() {
-                {
-                    setDate("2024-03-04T12:00");
-                    setGroupId(g2.getId());
-                    setDisciplineId(d2.getId());
-                    setDescription("Семинар");
-                }
-            });
+            ExerciseDto ex4Dto = new ExerciseDto();
+            ex4Dto.setDate("2024-03-04T12:00");
+            ex4Dto.setGroupId(g2.getId());
+            ex4Dto.setDisciplineId(d2.getId());
+            ex4Dto.setDescription("Семинар");
+            final var ex4 = exerciseService.create(ex4Dto);
 
-            final var ex5 = exerciseService.create(new ExerciseDto() {
-                {
-                    setDate("2024-03-05T13:00");
-                    setGroupId(g3.getId());
-                    setDisciplineId(d3.getId());
-                    setDescription("Введение в базы данных");
-                }
-            });
+            ExerciseDto ex5Dto = new ExerciseDto();
+            ex5Dto.setDate("2024-03-05T13:00");
+            ex5Dto.setGroupId(g3.getId());
+            ex5Dto.setDisciplineId(d3.getId());
+            ex5Dto.setDescription("Введение в базы данных");
+            final var ex5 = exerciseService.create(ex5Dto);
 
-            final var ex6 = exerciseService.create(new ExerciseDto() {
-                {
-                    setDate("2024-03-06T14:00");
-                    setGroupId(g3.getId());
-                    setDisciplineId(d3.getId());
-                    setDescription("Проектирование информационных систем");
-                }
-            });
+            ExerciseDto ex6Dto = new ExerciseDto();
+            ex6Dto.setDate("2024-03-06T14:00");
+            ex6Dto.setGroupId(g3.getId());
+            ex6Dto.setDisciplineId(d3.getId());
+            ex6Dto.setDescription("Проектирование информационных систем");
+            final var ex6 = exerciseService.create(ex6Dto);
 
-            log.info("Create default grades");
+            // Grades
+            GradeDto grade1 = new GradeDto();
+            grade1.setValue("4");
+            grade1.setExerciseId(ex1.getId());
+            grade1.setStudentId(u4.getId());
+            grade1.setDescription("Хорошо");
+            gradeService.create(grade1);
 
-            log.info("Create default grades");
+            GradeDto grade2 = new GradeDto();
+            grade2.setValue("4");
+            grade2.setExerciseId(ex2.getId());
+            grade2.setStudentId(u4.getId());
+            grade2.setDescription("Хорошо");
+            gradeService.create(grade2);
 
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("4");
-                    setExerciseId(ex1.getId());
-                    setStudentId(u4.getId());
-                    setDescription("Хорошо");
-                }
-            });
+            GradeDto grade3 = new GradeDto();
+            grade3.setValue("3");
+            grade3.setExerciseId(ex3.getId());
+            grade3.setStudentId(u5.getId());
+            grade3.setDescription("Средний результат");
+            gradeService.create(grade3);
 
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("4");
-                    setExerciseId(ex2.getId());
-                    setStudentId(u4.getId());
-                    setDescription("Хорошо");
-                }
-            });
+            GradeDto grade4 = new GradeDto();
+            grade4.setValue("2");
+            grade4.setExerciseId(ex4.getId());
+            grade4.setStudentId(u5.getId());
+            grade4.setDescription("Недостаточно подготовлен");
+            gradeService.create(grade4);
 
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("3");
-                    setExerciseId(ex3.getId());
-                    setStudentId(u5.getId());
-                    setDescription("Средний результат");
-                }
-            });
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("2");
-                    setExerciseId(ex4.getId());
-                    setStudentId(u5.getId());
-                    setDescription("Недостаточно подготовлен");
-                }
-            });
+            GradeDto grade5 = new GradeDto();
+            grade5.setValue("5");
+            grade5.setExerciseId(ex5.getId());
+            grade5.setStudentId(u3.getId());
+            grade5.setDescription("Отличное понимание темы");
+            gradeService.create(grade5);
 
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("5");
-                    setExerciseId(ex5.getId());
-                    setStudentId(u3.getId());
-                    setDescription("Отличное понимание темы");
-                }
-            });
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("4");
-                    setExerciseId(ex5.getId());
-                    setStudentId(u7.getId());
-                    setDescription("Хорошая работа");
-                }
-            });
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("5");
-                    setExerciseId(ex6.getId());
-                    setStudentId(u3.getId());
-                    setDescription("Лучший проект в группе");
-                }
-            });
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("4");
-                    setExerciseId(ex6.getId());
-                    setStudentId(u7.getId());
-                    setDescription("Хорошая работа");
-                }
-            });
+            GradeDto grade6 = new GradeDto();
+            grade6.setValue("4");
+            grade6.setExerciseId(ex5.getId());
+            grade6.setStudentId(u7.getId());
+            grade6.setDescription("Хорошая работа");
+            gradeService.create(grade6);
+
+            GradeDto grade7 = new GradeDto();
+            grade7.setValue("5");
+            grade7.setExerciseId(ex6.getId());
+            grade7.setStudentId(u3.getId());
+            grade7.setDescription("Лучший проект в группе");
+            gradeService.create(grade7);
+
+            GradeDto grade8 = new GradeDto();
+            grade8.setValue("4");
+            grade8.setExerciseId(ex6.getId());
+            grade8.setStudentId(u7.getId());
+            grade8.setDescription("Хорошая работа");
+            gradeService.create(grade8);
 
             log.info("Test data created successfully");
-
         }
     }
 }
