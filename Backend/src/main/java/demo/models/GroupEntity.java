@@ -18,13 +18,22 @@ public class GroupEntity extends BaseEntity {
     @Size(min = 2, max = 50)
     private String name;
 
-    @OneToMany
-    @JoinColumn(name = "group_id")
+    @OneToMany(mappedBy = "group", fetch = FetchType.EAGER)
     private Set<UserEntity> students = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "group_disciplines", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "discipline_id"))
     private Set<DisciplineEntity> disciplines = new HashSet<>();
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ExerciseEntity> exercises = new HashSet<>();
+
+    public Set<ExerciseEntity> getExercises() {
+        return exercises;
+    }
+
+    public void setExercises(Set<ExerciseEntity> exercises) {
+        this.exercises = exercises;
+    }
 
     public GroupEntity() {
     }

@@ -16,6 +16,7 @@ import DisciplinePanel from './DisciplinePanel';
 import GroupPanel from './GroupPanel';
 import UserPanel from './UserPanel';
 import JournalPanel from './JournalPanel';
+import StatisticPanel from './StatisticPanel';
 
 const decodeToken = (token) => {
   try {
@@ -107,7 +108,7 @@ export default function AppContent() {
         setEmail(data.email || login);
         
         if (finalRole === 'ADMIN') {
-          navigate('/authSelection'); 
+          navigate('/adminHome'); 
         } else if (finalRole === 'STUDENT') {
           navigate('/studentHome');
         } else if (finalRole === 'TEACHER') {
@@ -192,6 +193,14 @@ export default function AppContent() {
         element={
           <ProtectedRoute role={role} allowed={["TEACHER"]}>
             <JournalPanel />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/statisticPanel"
+        element={
+          <ProtectedRoute role={role} allowed={["TEACHER"]}>
+            <StatisticPanel />
           </ProtectedRoute>
         }
       />

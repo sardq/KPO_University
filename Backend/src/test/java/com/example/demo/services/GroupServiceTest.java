@@ -248,11 +248,13 @@ class GroupServiceTest {
         when(groupRepository.findByIdWithStudents(groupId))
                 .thenReturn(Optional.of(testGroup));
 
-        GroupEntity result = groupService.removeStudent(groupId, studentId);
+        when(userRepository.findById(studentId)).thenReturn(Optional.empty());
 
-        assertNotNull(result);
-        assertTrue(result.getStudents().isEmpty());
+        assertThrows(NotFoundException.class,
+                () -> groupService.removeStudent(groupId, studentId));
+
         verify(groupRepository).findByIdWithStudents(groupId);
+        verify(userRepository).findById(studentId);
         verify(groupRepository, never()).save(any());
     }
 

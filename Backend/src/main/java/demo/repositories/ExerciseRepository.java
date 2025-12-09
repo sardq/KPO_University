@@ -32,4 +32,14 @@ public interface ExerciseRepository extends CrudRepository<ExerciseEntity, Long>
     List<ExerciseEntity> findByDisciplineIdAndGroupId(@Param("disciplineId") Long disciplineId,
             @Param("groupId") Long groupId);
 
+    @Query("""
+            SELECT e FROM ExerciseEntity e
+            WHERE e.date = :date
+            AND e.group.id = :groupId
+            AND e.discipline.id = :disciplineId
+            """)
+    Optional<ExerciseEntity> findByDateAndGroupIdAndDisciplineId(
+            @Param("date") LocalDateTime date,
+            @Param("groupId") Long groupId,
+            @Param("disciplineId") Long disciplineId);
 }

@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { AuthContent } from './AuthContent';
 
 const ProtectedRoute = ({ children, allowed }) => {
-  const { role } = useContext(AuthContent);
+  const { role, is2FAVerified } = useContext(AuthContent);
   const token = localStorage.getItem('token');
 
   if (!token) {
@@ -19,7 +19,12 @@ const ProtectedRoute = ({ children, allowed }) => {
       </div>
     );
   }
-
+   if (role === 'ADMIN' && !is2FAVerified) {
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/emailAuth' && currentPath !== '/authSelection') {
+      return <Navigate to="/authSelection" replace />;
+    }
+  }
   if (!allowed.includes(role)) {
     if (role === "ADMIN") return <Navigate to="/authSelection" replace />;
     if (role === "STUDENT") return <Navigate to="/studentHome" replace />;

@@ -82,34 +82,43 @@ const GroupPanel = () => {
         currentPage: data.number + 1,
       }));
     } catch (error) {
-      console.error("Ошибка при загрузке групп:", error);
       showToastMessage("Ошибка загрузки групп", "danger");
     }
   }, [state.search, state.groupsPerPage]);
 
   useEffect(() => {
-    getGroups(state.currentPage);
-    loadAvailableStudents();
-  }, [getGroups, state.currentPage]);
-
-  const loadGroupDetails = async (groupId) => {
-    try {
-      const groupDetails = await groupActions.getGroupById(groupId);
-      setStudents(availableStudents.filter(s => groupDetails.studentIds.includes(s.id)));
-    } catch (error) {
-      console.error("Ошибка загрузки студентов группы:", error);
-    }
+  const loadData = async () => {
+    await getGroups(state.currentPage);
+    await loadAvailableStudents();
   };
+
+  loadData();
+}, [getGroups, state.currentPage]);
+  
+  const loadGroupDetails = async (groupId) => {
+  try {
+    await groupActions.getGroupById(groupId);
+    const studentsList = await groupActions.getGroupStudents(groupId);
+    setStudents(studentsList);
+
+    setAvailableStudents(prev =>
+      prev.filter(s => !studentsList.some(st => st.id === s.id))
+    );
+  } catch (error) {
+    showToastMessage("Ошибка загрузки студентов группы", "danger");
+  }
+};
 
   const loadAvailableStudents = async () => {
     try {
-      const data = await userActions.filterUsers("", "STUDENT", 0, 1000);
+      const data = await userActions.filterUserWithoutGroup("", 0, 1000);
       setAvailableStudents(data.content || []);
     } catch (error) {
-      console.error("Ошибка загрузки студентов:", error);
+    showToastMessage("Ошибка загрузки студентов", "danger");
+
+
     }
   };
-
   const handleSearchChange = (e) => {
     setState(prev => ({ ...prev, search: e.target.value }));
   };
@@ -158,7 +167,8 @@ const GroupPanel = () => {
   try {
     await loadGroupDetails(group.id);
   } catch (error) {
-    console.error('Ошибка загрузки студентов:', error);
+        showToastMessage("Ошибка загрузки информации о группе", "danger");
+
     setStudents([]); 
   }
   
@@ -194,40 +204,52 @@ const GroupPanel = () => {
       [name]: value
     }));
   };
+const isGroupNameValid = (name) => {
+  const trimmed = name.trim();
+  if (trimmed.length < 2 || trimmed.length > 50) return false;
+  const forbiddenPattern = /[^a-zA-Zа-яА-Я0-9\s\-]/; 
+  return !forbiddenPattern.test(trimmed);
+};
 
   const handleCreateGroup = async () => {
-    try {
-      if (!formData.name.trim()) {
-        showToastMessage("Название группы обязательно", "warning");
-        return;
-      }
+  if (!isGroupNameValid(formData.name)) {
+    showToastMessage(
+      "Название группы должно быть 2-50 символов и содержать допустимые символы (буквы, цифры, пробел, дефис)",
+      "warning"
+    );
+    return;
+  }
 
-      await groupActions.saveGroup(formData);
-      showToastMessage("Группа успешно создана", "success");
-      setShowCreateModal(false);
-      getGroups(state.currentPage);
-    } catch (error) {
-      console.error("Ошибка при создании группы:", error);
-      showToastMessage(error.response?.data?.message || "Ошибка при создании группы", "danger");
-    }
-  };
+  try {
+    await groupActions.saveGroup(formData);
+    showToastMessage("Группа успешно создана", "success");
+    setShowCreateModal(false);
+    getGroups(state.currentPage);
+  } catch (error) {
+    showToastMessage("Ошибка при создании группы", "danger");
+  }
+};
+
 
   const handleUpdateGroup = async () => {
-    try {
-      if (!formData.name.trim()) {
-        showToastMessage("Название группы обязательно", "warning");
-        return;
-      }
+  if (!isGroupNameValid(formData.name)) {
+    showToastMessage(
+      "Название группы должно быть 2-50 символов и содержать допустимые символы (буквы, цифры, пробел, дефис)",
+      "warning"
+    );
+    return;
+  }
 
-      await groupActions.updateGroup(currentGroup.id, formData);
-      showToastMessage("Группа успешно обновлена", "success");
-      setShowEditModal(false);
-      getGroups(state.currentPage);
-    } catch (error) {
-      console.error("Ошибка при обновлении группы:", error);
-      showToastMessage(error.response?.data?.message || "Ошибка при обновлении группы", "danger");
-    }
-  };
+  try {
+    await groupActions.updateGroup(currentGroup.id, formData);
+    showToastMessage("Группа успешно обновлена", "success");
+    setShowEditModal(false);
+    getGroups(state.currentPage);
+  } catch (error) {
+    showToastMessage("Ошибка при обновлении группы", "danger");
+  }
+};
+
 
   const handleDeleteGroup = async () => {
     try {
@@ -242,40 +264,51 @@ const GroupPanel = () => {
       setShowDeleteModal(false);
       getGroups(state.currentPage);
     } catch (error) {
-      console.error("Ошибка при удалении группы:", error);
-      showToastMessage(error.response?.data?.message || "Ошибка при удалении группы", "danger");
+      showToastMessage("Ошибка при удалении группы", "danger");
     }
   };
 
   const handleAddStudents = async () => {
-    try {
-      if (selectedStudentIds.length > 0) {
-        await groupActions.addStudentsToGroup(currentGroup.id, selectedStudentIds);
-        showToastMessage(`Добавлено ${selectedStudentIds.length} студентов в группу ${currentGroup.name}`, "success");
-      } else {
-        showToastMessage("Выберите хотя бы одного студента", "warning");
-        return;
-      }
-      
-      setShowAddStudentsModal(false);
-      getGroups(state.currentPage);
-    } catch (error) {
-      console.error("Ошибка при добавлении студентов:", error);
-      showToastMessage("Ошибка при добавлении студентов", "danger");
+  try {
+    if (selectedStudentIds.length === 0) {
+      showToastMessage("Выберите хотя бы одного студента", "warning");
+      return;
     }
-  };
+
+    await groupActions.addStudentsToGroup(currentGroup.id, selectedStudentIds);
+
+    await loadGroupDetails(currentGroup.id);  
+    await loadAvailableStudents();            
+
+    showToastMessage(
+      `Добавлено ${selectedStudentIds.length} студентов`,
+      "success"
+    );
+
+    setShowAddStudentsModal(false);
+    getGroups(state.currentPage);
+
+  } catch (error) {
+    showToastMessage("Ошибка при добавлении студентов", "danger");
+  }
+};
+
 
   const handleRemoveStudent = async (studentId) => {
-    try {
-      await groupActions.removeStudentFromGroup(currentGroup.id, studentId);
-      showToastMessage("Студент отвязан от группы", "success");
-      await loadGroupDetails(currentGroup.id);
-      getGroups(state.currentPage);
-    } catch (error) {
-      console.error("Ошибка при отвязке студента:", error);
-      showToastMessage("Ошибка при отвязке студента", "danger");
-    }
-  };
+  try {
+    await groupActions.removeStudentFromGroup(currentGroup.id, studentId);
+
+    await loadGroupDetails(currentGroup.id);  
+    await loadAvailableStudents();            
+
+    showToastMessage("Студент отвязан от группы", "success");
+
+    getGroups(state.currentPage);
+  } catch (error) {
+    showToastMessage("Ошибка при отвязке студента", "danger");
+  }
+};
+
 
   const getStudentFullName = (student) => {
     return `${student.firstName || ''} ${student.lastName || ''}`.trim() || student.login;
@@ -397,7 +430,8 @@ const GroupPanel = () => {
           />
           <p>Выберите студентов для добавления в группу:</p>
           <ListGroup>
-            {availableStudents.filter(s => !currentGroup?.studentIds?.includes(s.id))
+            {availableStudents
+            .filter(s => !students.some(st => st.id === s.id))
             .filter(s => 
             getStudentFullName(s).toLowerCase().includes(addStudentsSearch.toLowerCase()) ||
             (s.email || "").toLowerCase().includes(addStudentsSearch.toLowerCase())

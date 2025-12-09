@@ -79,16 +79,14 @@ const DisciplinePanel = () => {
       availableTeachers.filter(t => disciplineDetails.teacherIds.includes(t.id))
     );
   } catch (error) {
-    console.error("Ошибка загрузки преподавателей дисциплины:", error);
+      showToastMessage("Ошибка загрузки преподавателей дисциплины", "danger");
   }
 };
 const loadAvailableTeachers = async () => {
   try {
     const data = await userActions.filterUsers("", "TEACHER", 0, 100); 
-    console.log("availableTeachers =", data);
     setAvailableTeachers(data.content || []);
   } catch (error) {
-    console.error("Ошибка загрузки преподавателей:", error);
   }
 };
   const getDisciplines = useCallback(async (page) => {
@@ -109,7 +107,6 @@ const loadAvailableTeachers = async () => {
         currentPage: data.number + 1,
       }));
     } catch (error) {
-      console.error("Ошибка при загрузке дисциплин:", error);
       showToastMessage("Ошибка загрузки дисциплин", "danger");
     }
   }, [state.search, state.disciplinesPerPage]);
@@ -125,16 +122,28 @@ const loadAvailableTeachers = async () => {
       const disciplineDetails = await disciplineActions.getDisciplineById(disciplineId);
       setGroups(availableGroups.filter(g => disciplineDetails.groupIds.includes(g.id)));
     } catch (error) {
-      console.error("Ошибка загрузки групп дисциплины:", error);
+     showToastMessage("Ошибка загрузки групп дисциплины", "danger");
+
     }
   };
-
+  const validateDisciplineForm = () => {
+  if (formData.name.length < 2) {
+    showToastMessage("Название дисциплины слишком короткое", "warning");
+    return false;
+  }
+  if (formData.name.length > 100) {
+    showToastMessage("Название дисциплины слишком длинное (макс. 100 символов)", "warning");
+    return false;
+  }
+  return true;
+};
   const loadAvailableGroups = async () => {
     try {
       const data = await groupActions.getAllGroups(0);
       setAvailableGroups(data || []);
     } catch (error) {
-      console.error("Ошибка загрузки групп:", error);
+     showToastMessage("Ошибка загрузки групп", "danger");
+
     }
   };
 
@@ -214,7 +223,6 @@ const handleAddTeachers = async () => {
     setShowAddTeachersModal(false);
     getDisciplines(state.currentPage);
   } catch (error) {
-    console.error("Ошибка при добавлении преподавателей:", error);
     showToastMessage("Ошибка при добавлении преподавателей", "danger");
   }
 };
@@ -226,7 +234,6 @@ const handleRemoveTeacher = async (teacherId) => {
     await loadDisciplineTeachers(currentDiscipline.id);
     getDisciplines(state.currentPage);
   } catch (error) {
-    console.error("Ошибка при отвязке преподавателя:", error);
     showToastMessage("Ошибка при отвязке преподавателя", "danger");
   }
 };
@@ -261,6 +268,7 @@ const handleRemoveTeacher = async (teacherId) => {
   };
 
   const handleCreateDiscipline = async () => {
+    if (!validateDisciplineForm()) return;
     try {
       if (!formData.name.trim()) {
         showToastMessage("Название дисциплины обязательно", "warning");
@@ -272,12 +280,12 @@ const handleRemoveTeacher = async (teacherId) => {
       setShowCreateModal(false);
       getDisciplines(state.currentPage);
     } catch (error) {
-      console.error("Ошибка при создании дисциплины:", error);
-      showToastMessage(error.response?.data?.message || "Ошибка при создании дисциплины", "danger");
+      showToastMessage("Ошибка при создании дисциплины", "danger");
     }
   };
 
   const handleUpdateDiscipline = async () => {
+    if (!validateDisciplineForm()) return;
     try {
       if (!formData.name.trim()) {
         showToastMessage("Название дисциплины обязательно", "warning");
@@ -289,8 +297,7 @@ const handleRemoveTeacher = async (teacherId) => {
       setShowEditModal(false);
       getDisciplines(state.currentPage);
     } catch (error) {
-      console.error("Ошибка при обновлении дисциплины:", error);
-      showToastMessage(error.response?.data?.message || "Ошибка при обновлении дисциплины", "danger");
+      showToastMessage("Ошибка при обновлении дисциплины", "danger");
     }
   };
 
@@ -301,8 +308,7 @@ const handleRemoveTeacher = async (teacherId) => {
       setShowDeleteModal(false);
       getDisciplines(state.currentPage);
     } catch (error) {
-      console.error("Ошибка при удалении дисциплины:", error);
-      showToastMessage(error.response?.data?.message || "Ошибка при удалении дисциплины", "danger");
+      showToastMessage("Ошибка при удалении дисциплины", "danger");
     }
   };
 
@@ -319,7 +325,6 @@ const handleRemoveTeacher = async (teacherId) => {
       setShowAddGroupsModal(false);
       getDisciplines(state.currentPage);
     } catch (error) {
-      console.error("Ошибка при добавлении групп:", error);
       showToastMessage("Ошибка при добавлении групп", "danger");
     }
   };
@@ -331,7 +336,6 @@ const handleRemoveTeacher = async (teacherId) => {
       await loadDisciplineDetails(currentDiscipline.id);
       getDisciplines(state.currentPage);
     } catch (error) {
-      console.error("Ошибка при отвязке группы:", error);
       showToastMessage("Ошибка при отвязке группы", "danger");
     }
   };
@@ -657,7 +661,7 @@ const handleRemoveTeacher = async (teacherId) => {
             <tbody>
               {state?.disciplines?.length === 0 ? (
                 <tr align="center">
-                  <td colSpan="3">Нет дисциплин</td>
+                  <td colSpan="6">Нет дисциплин</td>
                 </tr>
               ) : (
                 state?.disciplines?.map((discipline) => (

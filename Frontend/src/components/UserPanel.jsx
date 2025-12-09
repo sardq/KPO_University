@@ -52,11 +52,37 @@ const UserPanel = () => {
     users: [],
     search: "",
     currentPage: 1,
-    usersPerPage: 5,
+    usersPerPage: 9,
     totalPages: 0,
     totalElements: 0,
   });
-  
+  const validateForm = () => {
+  if (!formData.login || formData.login.trim().length < 4) {
+    showToastMessage("Логин должен быть минимум 4 символа", "warning");
+    return false;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!formData.email || !emailRegex.test(formData.email)) {
+    showToastMessage("Введите корректный email", "warning");
+    return false;
+  }
+
+  if (!formData.firstName || formData.firstName.trim().length < 2) {
+    showToastMessage("Фамилия должна быть минимум 2 символа", "warning");
+    return false;
+  }
+  if (!formData.lastName || formData.lastName.trim().length < 2) {
+    showToastMessage("Имя должно быть минимум 2 символа", "warning");
+    return false;
+  }
+  if (!formData.role) {
+    showToastMessage("Выберите роль пользователя", "warning");
+    return false;
+  }
+
+  return true;
+};
   const getUsers = useCallback(async (page) => {
     try {
       const pageNumber = page - 1;
@@ -75,7 +101,6 @@ const UserPanel = () => {
         currentPage: data.number + 1,
       }));
     } catch (error) {
-      console.error("Ошибка при загрузке пользователей:", error);
       showToastMessage("Ошибка загрузки пользователей", "danger");
     }
   }, [state.search, state.usersPerPage, roleFilter]);
@@ -131,7 +156,6 @@ const UserPanel = () => {
       showToastMessage("Пользователь успешно удален", "danger");
       await getUsers(state.currentPage);
     } catch (error) {
-      console.error("Ошибка при удалении:", error);
       showToastMessage("Ошибка при удалении пользователя", "danger");
     }
   };
@@ -173,6 +197,7 @@ const UserPanel = () => {
   };
 
   const handleSubmitUser = async () => {
+    if (!validateForm()) return;
     try {
       if (modalMode === "create") {
         const { password, ...dataWithoutPassword } = formData;
@@ -192,8 +217,7 @@ const UserPanel = () => {
       setShowModal(false);
       getUsers(state.currentPage);
     } catch (error) {
-      console.error("Ошибка при сохранении пользователя:", error);
-      showToastMessage(error.response?.data?.message || "Ошибка при сохранении", "danger");
+      showToastMessage("Ошибка при сохранении", "danger");
     }
   };
 
@@ -227,11 +251,11 @@ const UserPanel = () => {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>
+          <Modal.Title className='text-white'>
             {modalMode === "create" ? "Создать пользователя" : "Редактировать пользователя"}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className='text-white'>
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Логин *</Form.Label>
@@ -353,14 +377,16 @@ const UserPanel = () => {
         <Card.Body style={{ overflowY: 'auto', flex: '1 1 auto', minHeight: 0 }}>
           <Table bordered hover striped variant="dark" style={{ tableLayout: "fixed", width: "100%" }}>
             <colgroup>
-              <col style={{ width: "25%" }} />
-              <col style={{ width: "25%" }} />
               <col style={{ width: "20%" }} />
-              <col style={{ width: "30%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "20%" }} />
             </colgroup>
             <thead>
               <tr>
                 <th>ФИО</th>
+                <th>Логин</th>
                 <th>Email</th>
                 <th>Роль</th>
                 <th>Действия</th>
@@ -375,6 +401,7 @@ const UserPanel = () => {
                 state?.users?.map((user) => (
                   <tr key={user.id}>
                     <td>{getFullName(user)}</td>
+                    <td>{user.login}</td>
                     <td>{user.email}</td>
                     <td>
                         {getRoleName(user.role)}

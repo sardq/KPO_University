@@ -20,9 +20,12 @@ public class DisciplineEntity extends BaseEntity {
 
     @ManyToMany(mappedBy = "disciplines")
     private Set<GroupEntity> groups = new HashSet<>();
-    @ManyToMany(cascade = CascadeType.ALL)
+
+    @ManyToMany
     @JoinTable(name = "discipline_teachers", joinColumns = @JoinColumn(name = "discipline_id"), inverseJoinColumns = @JoinColumn(name = "teacher_id"))
     private Set<UserEntity> teachers = new HashSet<>();
+    @OneToMany(mappedBy = "discipline", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ExerciseEntity> exercises = new HashSet<>();
 
     public DisciplineEntity() {
     }

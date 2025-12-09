@@ -115,4 +115,15 @@ public class UserController {
 
         return ResponseEntity.status(401).build();
     }
+
+    @GetMapping("/students/without-group/search")
+    public Page<UserDto> searchStudentsWithoutGroup(
+            @RequestParam(name = "search", defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        logger.info("Поиск студентов без группы: , page={}, pageSize={}", page, pageSize);
+
+        Page<UserEntity> result = userService.searchStudentsWithoutGroup(search, page, pageSize);
+        return result.map(this::toDto);
+    }
 }

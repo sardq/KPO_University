@@ -6,6 +6,7 @@ import demo.models.UserEntity;
 import demo.repositories.GroupRepository;
 import demo.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -97,10 +99,15 @@ public class GroupService {
 
     @Transactional
     public GroupEntity delete(Long id) {
-        logger.info("Удаление группы {}", id);
-        var exists = self.get(id);
-        repository.delete(exists);
-        return exists;
+        GroupEntity group = self.get(id);
+
+        group.getStudents().forEach(student -> student.setGroup(null));
+        group.getStudents().clear();
+
+        group.getDisciplines().clear();
+
+        repository.delete(group);
+        return group;
     }
 
     @Transactional
@@ -108,8 +115,26 @@ public class GroupService {
         logger.info("Добавление студента {} в группу {}", studentId, groupId);
 
         GroupEntity group = self.get(groupId);
+
         UserEntity user = userRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException(UserEntity.class, studentId));
+
+        if (user.getGroup() != null) {
+            if (user.getGroup().getId().equals(groupId)) {
+                throw new ValidationException(
+                        String.format("Студент %s уже состоит в группе %s",
+                                user.getLogin(),
+                                group.getName()));
+            } else {
+                throw new ValidationException(
+                        String.format("Студент %s уже состоит в другой группе %s",
+                                user.getLogin(),
+                                user.getGroup().getName()));
+            }
+        }
+
+        user.setGroup(group);
+        userRepository.save(user);
 
         group.getStudents().add(user);
         repository.save(group);
@@ -122,16 +147,20 @@ public class GroupService {
         logger.info("Удаление студента {} из группы {}", studentId, groupId);
 
         GroupEntity group = self.get(groupId);
-        boolean removed = group.getStudents().removeIf(u -> u.getId().equals(studentId));
 
-        if (removed) {
-            var result = repository.save(group);
-            logger.info("Студент удален из группы");
-            return result;
-        } else {
-            logger.warn("Студент {} не найден в группе {}", studentId, groupId);
-            return group;
-        }
+        UserEntity user = userRepository.findById(studentId)
+                .orElseThrow(() -> new NotFoundException(UserEntity.class, studentId));
+
+        user.setGroup(null);
+        userRepository.save(user);
+
+        group.getStudents().removeIf(u -> Objects.equals(u.getId(), studentId));
+
+        GroupEntity updated = repository.save(group);
+
+        logger.info("Студент {} успешно удалён из группы {}", studentId, groupId);
+
+        return updated;
     }
 
     @Transactional(readOnly = true)

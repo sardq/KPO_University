@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const EmailAuth = () => {
 
-    const { email, setEmail } = useContext(AuthContent);
+    const { email, setEmail, setIs2FAVerified } = useContext(AuthContent);
     const navigate = useNavigate();
   const onOtpSubmit = (otp) => {
         request(
@@ -17,6 +17,7 @@ const EmailAuth = () => {
         ).then(response => {
             if(response.data.status === "Sucess")
             {
+                setIs2FAVerified(true);
                 setEmail(null);
                 navigate("/adminHome");
             }
