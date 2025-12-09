@@ -81,7 +81,6 @@ public class JournalReportService {
 
         dto.setStudents(rows);
 
-        // средняя по группе
         dto.setGroupAverage(
                 rows.stream()
                         .map(JournalReportDto.StudentRow::getAverage)

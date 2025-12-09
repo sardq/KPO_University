@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login", "/register", "/reset-password",
                                 "/api/otp/**")
                         .permitAll()
+                        .requestMatchers("/api/protocol/**")
+                        .hasRole("TEACHER")
                         .requestMatchers(HttpMethod.POST, "/api/users/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/api/disciplines/**", "/api/groups/**", "/api/grades/**", "/api/exercises/**")

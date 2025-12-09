@@ -25,10 +25,13 @@ public class JournalReportControlService {
 
     private final String BUCKET_NAME = "protocols";
 
-    public void saveProtocol(JournalReportDto dto) {
+    public Long saveProtocol(JournalReportDto dto) {
         logger.info("Попытка сохранить протокол");
         byte[] pdf = generatorService.generate(dto);
-        String filename = "protocol_group" + dto.getGroupName() + "_discipline" + dto.getDisciplineName() + ".pdf";
+        if (dto.getId() == null) {
+            dto.setId(System.currentTimeMillis());
+        }
+        String filename = "protocol_" + dto.getId() + ".pdf";
 
         try {
             createBucketIfNotExists();
@@ -43,6 +46,7 @@ public class JournalReportControlService {
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при загрузке файла в MinIO", e);
         }
+        return dto.getId();
     }
 
     public byte[] getProtocol(Long id) {

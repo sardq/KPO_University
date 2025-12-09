@@ -18,8 +18,7 @@ public class GroupEntity extends BaseEntity {
     @Size(min = 2, max = 50)
     private String name;
 
-    @OneToMany
-    @JoinColumn(name = "group_id")
+    @OneToMany(mappedBy = "group")
     private Set<UserEntity> students = new HashSet<>();
 
     @ManyToMany

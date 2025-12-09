@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/protocol")
 public class ProtocolController {
@@ -23,10 +22,10 @@ public class ProtocolController {
     private final JournalReportControlService protocolControlService;
 
     @PostMapping("/pdf")
-    public ResponseEntity<Void> generateProtocol(@RequestBody JournalReportDto dto) {
+    public ResponseEntity<Long> generateProtocol(@RequestBody JournalReportDto dto) {
         logger.info("Запрос на генерацию протокола: {}", dto);
-        protocolControlService.saveProtocol(dto);
-        return ResponseEntity.ok().build();
+        Long id = protocolControlService.saveProtocol(dto);
+        return ResponseEntity.ok(id);
     }
 
     @GetMapping("/pdf/{id}")

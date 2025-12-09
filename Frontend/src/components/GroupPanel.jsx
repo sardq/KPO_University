@@ -103,7 +103,7 @@ const GroupPanel = () => {
 
   const loadAvailableStudents = async () => {
     try {
-      const data = await userActions.filterUsers("", "STUDENT", 0, 1000);
+      const data = await userActions.filterUserWithoutGroup("", 0, 1000);
       setAvailableStudents(data.content || []);
     } catch (error) {
       console.error("Ошибка загрузки студентов:", error);

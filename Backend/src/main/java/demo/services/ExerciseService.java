@@ -91,9 +91,11 @@ public class ExerciseService {
 
         LocalDateTime date = dto.getDateAsLocalDateTime();
         if (date != null) {
-            Optional<ExerciseEntity> existingExercise = repository.findByDate(date);
+            Optional<ExerciseEntity> existingExercise = repository.findByDateAndGroupIdAndDisciplineId(
+                    date, dto.getGroupId(), dto.getDisciplineId());
             if (existingExercise.isPresent()) {
-                throw new IllegalArgumentException("Занятие с такой датой уже существует");
+                throw new IllegalArgumentException(
+                        String.format("Занятие с такой датой уже существует для группы и дисциплины"));
             }
         }
 
@@ -127,9 +129,15 @@ public class ExerciseService {
 
         LocalDateTime newDate = dto.getDateAsLocalDateTime();
         if (newDate != null && !newDate.equals(existing.getDate())) {
-            Optional<ExerciseEntity> duplicate = repository.findByDate(newDate);
+            Long checkGroupId = existing.getGroup().getId();
+            Long checkDisciplineId = existing.getDiscipline().getId();
+
+            Optional<ExerciseEntity> duplicate = repository.findByDateAndGroupIdAndDisciplineId(
+                    newDate, checkGroupId, checkDisciplineId);
             if (duplicate.isPresent() && !duplicate.get().getId().equals(id)) {
-                throw new IllegalArgumentException("Занятие с такой датой уже существует");
+                throw new IllegalArgumentException(
+                        String.format("Занятие с такой датой уже существует для группы %s и дисциплины %s",
+                                existing.getGroup().getName(), existing.getDiscipline().getName()));
             }
             existing.setDate(newDate);
         }

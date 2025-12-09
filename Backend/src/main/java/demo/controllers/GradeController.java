@@ -91,9 +91,11 @@ public class GradeController {
         return service.getByGroupAndDiscipline(groupId, disciplineId);
     }
 
-    @GetMapping("/avg/student/{studentId}")
-    public Double getStudentAverage(@PathVariable Long studentId) {
-        return service.getStudentAverage(studentId);
+    @GetMapping("/avg/student/{studentId}/{disciplineId}")
+    public Double getStudentAverageByDiscipline(
+            @PathVariable Long studentId,
+            @PathVariable Long disciplineId) {
+        return service.getStudentAverageByDiscipline(studentId, disciplineId);
     }
 
     @GetMapping("/avg/discipline/{disciplineId}")
@@ -102,10 +104,19 @@ public class GradeController {
     }
 
     @GetMapping("/avg/students/{groupId}/{disciplineId}")
-    public List<GradeDto.StudentAvg> getStudentsAverages(
+    public Double getGroupsAverages(
             @PathVariable Long groupId,
             @PathVariable Long disciplineId) {
-        return service.getStudentsAverages(groupId, disciplineId);
+        return service.getGroupAverage(groupId, disciplineId);
+    }
+
+    @GetMapping("/student/{studentId}/{disciplineId}")
+    public List<GradeDto> getStudentGrades(
+            @PathVariable Long studentId,
+            @PathVariable Long disciplineId) {
+        return service.getStudentGradesByDiscipline(studentId, disciplineId).stream()
+                .map(this::toDto)
+                .toList();
     }
 
 }

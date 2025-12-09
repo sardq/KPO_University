@@ -52,7 +52,18 @@ export const filterUsers = async (search = "", role = "", page = 0, pageSize = 5
         throw error;
     }
 };
-
+export const filterUserWithoutGroup = async (search = "", page = 0, pageSize = 5) => {
+        
+        const response = await api.get(`${BASE_URL}/students/without-group/search`, {
+            params: {
+                search,
+                page,
+                size: pageSize
+            }
+        });
+        
+        return response.data;
+};
 export const getAllUsers = async (page = 0) => {
     const response = await api.get(BASE_URL, { params: { page } });
     return response.data;

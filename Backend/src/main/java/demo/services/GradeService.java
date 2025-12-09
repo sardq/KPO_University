@@ -66,6 +66,9 @@ public class GradeService {
 
         UserEntity student = studentRepository.findById(dto.getStudentId())
                 .orElseThrow(() -> new NotFoundException(GradeEntity.class, dto.getStudentId()));
+        if (!exercise.getGroup().getStudents().contains(student)) {
+            throw new IllegalArgumentException("Студент не принадлежит группе занятия");
+        }
 
         GradeEnum value = GradeEnum.fromCode(dto.getValue());
 
@@ -100,7 +103,9 @@ public class GradeService {
                     .orElseThrow(() -> new NotFoundException(UserEntity.class, dto.getStudentId()));
             existing.setStudent(newSt);
         }
-
+        if (!existing.getExercise().getGroup().getStudents().contains(existing.getStudent())) {
+            throw new IllegalArgumentException("Студент не принадлежит группе занятия");
+        }
         existing.setDescription(dto.getDescription());
         existing.setValue(GradeEnum.fromCode(dto.getValue()));
 
@@ -123,8 +128,8 @@ public class GradeService {
     }
 
     @Transactional(readOnly = true)
-    public Double getStudentAverage(Long studentId) {
-        return repository.getStudentAverage(studentId);
+    public Double getStudentAverageByDiscipline(Long studentId, Long disciplineId) {
+        return repository.getStudentAverageByDiscipline(studentId, disciplineId);
     }
 
     @Transactional(readOnly = true)
@@ -133,8 +138,13 @@ public class GradeService {
     }
 
     @Transactional(readOnly = true)
-    public List<GradeDto.StudentAvg> getStudentsAverages(Long groupId, Long disciplineId) {
+    public Double getGroupAverage(Long groupId, Long disciplineId) {
         return repository.getStudentsAverages(groupId, disciplineId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GradeEntity> getStudentGradesByDiscipline(Long studentId, Long disciplineId) {
+        return repository.findByStudentIdAndDisciplineId(studentId, disciplineId);
     }
 
 }

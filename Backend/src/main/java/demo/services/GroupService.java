@@ -6,6 +6,7 @@ import demo.models.UserEntity;
 import demo.repositories.GroupRepository;
 import demo.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,8 +109,26 @@ public class GroupService {
         logger.info("Добавление студента {} в группу {}", studentId, groupId);
 
         GroupEntity group = self.get(groupId);
+
         UserEntity user = userRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException(UserEntity.class, studentId));
+
+        if (user.getGroup() != null) {
+            if (user.getGroup().getId().equals(groupId)) {
+                throw new ValidationException(
+                        String.format("Студент %s уже состоит в группе %s",
+                                user.getLogin(),
+                                group.getName()));
+            } else {
+                throw new ValidationException(
+                        String.format("Студент %s уже состоит в другой группе %s",
+                                user.getLogin(),
+                                user.getGroup().getName()));
+            }
+        }
+
+        user.setGroup(group);
+        userRepository.save(user);
 
         group.getStudents().add(user);
         repository.save(group);

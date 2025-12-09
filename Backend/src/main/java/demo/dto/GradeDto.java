@@ -1,9 +1,6 @@
 package demo.dto;
 
 import demo.models.GradeEntity;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 public class GradeDto {
 

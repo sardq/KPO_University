@@ -54,22 +54,22 @@ public class UserService {
     }
 
     private void checkEmail(Long id, String login) {
-    logger.info("Проверка существования пользователя: id={}", id); 
-    final Optional<UserEntity> existsUser = repository.findByEmailIgnoreCase(login);
-    if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
-        logger.warn("Пользователь с такой почтой уже существует"); 
-        throw new IllegalArgumentException("Пользователь с такой почтой уже существует");
+        logger.info("Проверка существования пользователя: id={}", id);
+        final Optional<UserEntity> existsUser = repository.findByEmailIgnoreCase(login);
+        if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
+            logger.warn("Пользователь с такой почтой уже существует");
+            throw new IllegalArgumentException("Пользователь с такой почтой уже существует");
+        }
     }
-}
 
-private void checkLogin(Long id, String login) {
-    logger.info("Проверка логина: id={}", id); 
-    final Optional<UserEntity> existsUser = repository.findByLogin(login);
-    if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
-        logger.warn("Пользователь с таким логином уже существует"); 
-        throw new IllegalArgumentException("Пользователь с таким логином уже существует");
+    private void checkLogin(Long id, String login) {
+        logger.info("Проверка логина: id={}", id);
+        final Optional<UserEntity> existsUser = repository.findByLogin(login);
+        if (existsUser.isPresent() && !existsUser.get().getId().equals(id)) {
+            logger.warn("Пользователь с таким логином уже существует");
+            throw new IllegalArgumentException("Пользователь с таким логином уже существует");
+        }
     }
-}
 
     @Transactional(readOnly = true)
     public List<UserEntity> getAll() {
@@ -126,9 +126,11 @@ private void checkLogin(Long id, String login) {
         }
         checkEmail(null, entity.getEmail());
         String generatedPassword = generateRandomPassword(10);
-        entity.setPassword(passwordEncoder.encode(generatedPassword));
+        // entity.setPassword(passwordEncoder.encode(generatedPassword));
+        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         try {
-            emailService.sendPasswordEmail(entity.getEmail(), entity.getLogin(), generatedPassword);
+            // emailService.sendPasswordEmail(entity.getEmail(), entity.getLogin(),
+            // generatedPassword);
         } catch (Exception e) {
             logger.error("Ошибка отправки пароля на почту: {}", e.getMessage());
         }
@@ -247,6 +249,16 @@ private void checkLogin(Long id, String login) {
             result = repository.findAll(pageable);
         }
 
+        logger.info(LOG_RESPONSE, result);
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserEntity> searchStudentsWithoutGroup(String search, int page, int size) {
+        logger.info("Поиск студентов без группы: search={}, page={}, size={}", search, page, size);
+        var result = repository.searchStudentsWithoutGroup(
+                search != null ? search : "",
+                PageRequest.of(page, size));
         logger.info(LOG_RESPONSE, result);
         return result;
     }

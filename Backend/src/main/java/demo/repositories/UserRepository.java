@@ -85,4 +85,22 @@ public interface UserRepository extends CrudRepository<UserEntity, Long>,
             )
             """)
     Page<UserEntity> findByGroupId(@Param("groupId") Long groupId, Pageable pageable);
+
+    @Query("""
+            SELECT u FROM UserEntity u
+            WHERE u.role = demo.models.UserRole.STUDENT
+            AND u.group IS NULL
+            """)
+    Page<UserEntity> findStudentsWithoutGroup(Pageable pageable);
+
+    @Query("""
+            SELECT u FROM UserEntity u
+            WHERE u.role = demo.models.UserRole.STUDENT
+            AND u.group IS NULL
+            AND (LOWER(u.login) LIKE LOWER(CONCAT('%', :text, '%'))
+            OR LOWER(u.email) LIKE LOWER(CONCAT('%', :text, '%'))
+            OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :text, '%'))
+            OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :text, '%')))
+            """)
+    Page<UserEntity> searchStudentsWithoutGroup(@Param("text") String text, Pageable pageable);
 }
