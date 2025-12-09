@@ -4,6 +4,7 @@ import demo.core.error.NotFoundException;
 import demo.dto.GradeDto;
 import demo.models.GradeEntity;
 import demo.models.GradeEnum;
+import demo.models.GroupEntity;
 import demo.models.ExerciseEntity;
 import demo.models.UserEntity;
 import demo.repositories.GradeRepository;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,11 +56,17 @@ class GradeServiceTest {
     void setUp() {
         ReflectionTestUtils.setField(gradeService, "self", gradeService);
 
-        testExercise = new ExerciseEntity();
-        testExercise.setId(1L);
+        GroupEntity testGroup = new GroupEntity();
+        testGroup.setId(10L);
+        testGroup.setStudents(new HashSet<>());
 
         testStudent = new UserEntity();
         testStudent.setId(1L);
+        testGroup.getStudents().add(testStudent);
+
+        testExercise = new ExerciseEntity();
+        testExercise.setId(1L);
+        testExercise.setGroup(testGroup);
 
         testGrade = new GradeEntity();
         testGrade.setId(1L);
@@ -220,9 +228,17 @@ class GradeServiceTest {
         dto.setExerciseId(2L);
         dto.setStudentId(1L);
         dto.setValue("4");
+        dto.setDescription("Updated grade");
 
         ExerciseEntity newExercise = new ExerciseEntity();
         newExercise.setId(2L);
+
+        GroupEntity newGroup = new GroupEntity();
+        newGroup.setId(10L);
+        newGroup.setStudents(new HashSet<>());
+        newExercise.setGroup(newGroup);
+
+        newGroup.getStudents().add(testStudent);
 
         doReturn(testGrade).when(gradeService).get(gradeId);
         when(exerciseRepository.findById(2L)).thenReturn(Optional.of(newExercise));
@@ -242,9 +258,19 @@ class GradeServiceTest {
         dto.setExerciseId(1L);
         dto.setStudentId(2L);
         dto.setValue("4");
+        dto.setDescription("Updated grade");
 
         UserEntity newStudent = new UserEntity();
         newStudent.setId(2L);
+
+        GroupEntity exerciseGroup = testExercise.getGroup();
+        if (exerciseGroup == null) {
+            exerciseGroup = new GroupEntity();
+            exerciseGroup.setId(10L);
+            exerciseGroup.setStudents(new HashSet<>());
+            testExercise.setGroup(exerciseGroup);
+        }
+        exerciseGroup.getStudents().add(newStudent);
 
         doReturn(testGrade).when(gradeService).get(gradeId);
         when(studentRepository.findById(2L)).thenReturn(Optional.of(newStudent));

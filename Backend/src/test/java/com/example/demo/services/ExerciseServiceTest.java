@@ -163,7 +163,6 @@ class ExerciseServiceTest {
         updateDto.setDisciplineId(1L);
 
         doReturn(testExercise).when(exerciseService).get(exerciseId);
-        when(exerciseRepository.findByDate(any(LocalDateTime.class))).thenReturn(Optional.empty());
         when(exerciseRepository.save(any(ExerciseEntity.class))).thenReturn(testExercise);
 
         ExerciseEntity result = exerciseService.update(exerciseId, updateDto);
@@ -180,7 +179,7 @@ class ExerciseServiceTest {
         ExerciseDto updateDto = new ExerciseDto();
         updateDto.setDate("2024-01-16T11:00:00");
         updateDto.setDescription("Updated Exercise");
-        updateDto.setGroupId(2L); 
+        updateDto.setGroupId(2L);
         updateDto.setDisciplineId(1L);
 
         doReturn(testExercise).when(exerciseService).get(exerciseId);
@@ -207,8 +206,6 @@ class ExerciseServiceTest {
         verify(exerciseRepository).delete(testExercise);
     }
 
-    
-
     @Test
     void update_WithNullDate_ShouldUpdateExercise() {
         Long exerciseId = 1L;
@@ -228,132 +225,144 @@ class ExerciseServiceTest {
         verify(exerciseRepository, never()).findByDate(any());
         verify(exerciseRepository).save(any(ExerciseEntity.class));
     }
-   
 
-@Test
-void getAll_ShouldReturnEmptyListWhenNoExercises() {
-    Page<ExerciseEntity> emptyPage = new PageImpl<>(List.of());
-    
-    when(exerciseRepository.findAll(any(PageRequest.class))).thenReturn(emptyPage);
+    @Test
+    void getAll_ShouldReturnEmptyListWhenNoExercises() {
+        Page<ExerciseEntity> emptyPage = new PageImpl<>(List.of());
 
-    List<ExerciseEntity> result = exerciseService.getAll();
+        when(exerciseRepository.findAll(any(PageRequest.class))).thenReturn(emptyPage);
 
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
-    verify(exerciseRepository).findAll(any(PageRequest.class));
-}
+        List<ExerciseEntity> result = exerciseService.getAll();
 
-@Test
-void create_WithValidData_ShouldCreateExercise() {
-    ExerciseDto dto = new ExerciseDto();
-    dto.setGroupId(1L);
-    dto.setDisciplineId(1L);
-    dto.setDescription("Test Exercise");
-    dto.setDate("2024-01-15T10:00"); 
-    
-    ExerciseEntity savedEntity = new ExerciseEntity();
-    savedEntity.setId(1L);
-    savedEntity.setDate(LocalDateTime.of(2024, 1, 15, 10, 0));
-    savedEntity.setDescription("Test Exercise");
-    savedEntity.setGroup(testGroup);
-    savedEntity.setDiscipline(testDiscipline);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(exerciseRepository).findAll(any(PageRequest.class));
+    }
 
-    when(groupRepository.findById(1L)).thenReturn(Optional.of(testGroup));
-    when(disciplineRepository.findById(1L)).thenReturn(Optional.of(testDiscipline));
-    when(exerciseRepository.findByDate(any(LocalDateTime.class))).thenReturn(Optional.empty());
-    when(exerciseRepository.save(any(ExerciseEntity.class))).thenReturn(savedEntity);
+    @Test
+    void create_WithValidData_ShouldCreateExercise() {
+        ExerciseDto dto = new ExerciseDto();
+        dto.setGroupId(1L);
+        dto.setDisciplineId(1L);
+        dto.setDescription("Test Exercise");
+        dto.setDate("2024-01-15T10:00");
 
-    ExerciseEntity result = exerciseService.create(dto);
+        ExerciseEntity savedEntity = new ExerciseEntity();
+        savedEntity.setId(1L);
+        savedEntity.setDate(LocalDateTime.of(2024, 1, 15, 10, 0));
+        savedEntity.setDescription("Test Exercise");
+        savedEntity.setGroup(testGroup);
+        savedEntity.setDiscipline(testDiscipline);
 
-    assertNotNull(result);
-    assertEquals(LocalDateTime.of(2024, 1, 15, 10, 0), result.getDate());
-    assertEquals("Test Exercise", result.getDescription());
-    verify(groupRepository).findById(1L);
-    verify(disciplineRepository).findById(1L);
-    verify(exerciseRepository).findByDate(any(LocalDateTime.class));
-    verify(exerciseRepository).save(any(ExerciseEntity.class));
-}
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(testGroup));
+        when(disciplineRepository.findById(1L)).thenReturn(Optional.of(testDiscipline));
 
-@Test
-void create_WithDuplicateDate_ShouldThrowIllegalArgumentException() {
-    ExerciseDto dto = new ExerciseDto();
-    dto.setGroupId(1L);
-    dto.setDisciplineId(1L);
-    dto.setDate("2024-01-15T10:00");
-    dto.setDescription("Exercise with duplicate date");
+        when(exerciseRepository.findByDateAndGroupIdAndDisciplineId(
+                any(LocalDateTime.class), eq(1L), eq(1L)))
+                .thenReturn(Optional.empty());
 
-    ExerciseEntity duplicateExercise = new ExerciseEntity();
-    duplicateExercise.setId(2L);
-    duplicateExercise.setDate(LocalDateTime.of(2024, 1, 15, 10, 0));
+        when(exerciseRepository.save(any(ExerciseEntity.class))).thenReturn(savedEntity);
 
-    when(groupRepository.findById(1L)).thenReturn(Optional.of(testGroup));
-    when(disciplineRepository.findById(1L)).thenReturn(Optional.of(testDiscipline));
-    when(exerciseRepository.findByDate(any(LocalDateTime.class)))
-            .thenReturn(Optional.of(duplicateExercise));
+        ExerciseEntity result = exerciseService.create(dto);
 
-    assertThrows(IllegalArgumentException.class, () -> exerciseService.create(dto));
-    verify(exerciseRepository).findByDate(any(LocalDateTime.class));
-    verify(exerciseRepository, never()).save(any());
-}
+        assertNotNull(result);
+        assertEquals(LocalDateTime.of(2024, 1, 15, 10, 0), result.getDate());
+        assertEquals("Test Exercise", result.getDescription());
+        verify(groupRepository).findById(1L);
+        verify(disciplineRepository).findById(1L);
+        verify(exerciseRepository).findByDateAndGroupIdAndDisciplineId(
+                any(LocalDateTime.class), eq(1L), eq(1L));
+        verify(exerciseRepository).save(any(ExerciseEntity.class));
+    }
 
-@Test
-void update_WithSameDate_ShouldNotCheckForDuplicates() {
-    Long exerciseId = 1L;
-    LocalDateTime sameDate = LocalDateTime.of(2024, 1, 15, 10, 0);
-    
-    ExerciseDto updateDto = new ExerciseDto();
-    updateDto.setDate("2024-01-15T10:00"); 
-    updateDto.setDescription("Updated Exercise");
-    updateDto.setGroupId(1L);
-    updateDto.setDisciplineId(1L);
+    @Test
+    void create_WithDuplicateDate_ShouldThrowIllegalArgumentException() {
+        ExerciseDto dto = new ExerciseDto();
+        dto.setGroupId(1L);
+        dto.setDisciplineId(1L);
+        dto.setDate("2024-01-15T10:00");
+        dto.setDescription("Exercise with duplicate date");
 
-    ExerciseEntity existingExercise = new ExerciseEntity();
-    existingExercise.setId(exerciseId);
-    existingExercise.setDate(sameDate); 
-    existingExercise.setDescription("Old Exercise");
-    existingExercise.setGroup(testGroup);
-    existingExercise.setDiscipline(testDiscipline);
+        ExerciseEntity duplicateExercise = new ExerciseEntity();
+        duplicateExercise.setId(2L);
+        duplicateExercise.setDate(LocalDateTime.of(2024, 1, 15, 10, 0));
 
-    doReturn(existingExercise).when(exerciseService).get(exerciseId);
-    when(exerciseRepository.save(any(ExerciseEntity.class))).thenReturn(existingExercise);
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(testGroup));
+        when(disciplineRepository.findById(1L)).thenReturn(Optional.of(testDiscipline));
 
-    ExerciseEntity result = exerciseService.update(exerciseId, updateDto);
+        when(exerciseRepository.findByDateAndGroupIdAndDisciplineId(
+                any(LocalDateTime.class), eq(1L), eq(1L)))
+                .thenReturn(Optional.of(duplicateExercise));
 
-    assertNotNull(result);
-    verify(exerciseRepository, never()).findByDate(any()); 
-    verify(exerciseRepository).save(any(ExerciseEntity.class));
-}
+        assertThrows(IllegalArgumentException.class, () -> exerciseService.create(dto));
+        verify(exerciseRepository).findByDateAndGroupIdAndDisciplineId(
+                any(LocalDateTime.class), eq(1L), eq(1L));
+        verify(exerciseRepository, never()).save(any());
+    }
 
-@Test
-void update_WithNewDateThatIsDuplicateOfOtherExercise_ShouldThrowIllegalArgumentException() {
-    Long exerciseId = 1L;
-    LocalDateTime oldDate = LocalDateTime.of(2024, 1, 15, 10, 0);
-    LocalDateTime newDate = LocalDateTime.of(2024, 1, 16, 11, 0);
-    
-    ExerciseEntity duplicateExercise = new ExerciseEntity();
-    duplicateExercise.setId(2L);
-    duplicateExercise.setDate(newDate);
-    
-    ExerciseDto updateDto = new ExerciseDto();
-    updateDto.setDate("2024-01-16T11:00"); 
-    updateDto.setDescription("Updated Exercise");
-    updateDto.setGroupId(1L);
-    updateDto.setDisciplineId(1L);
+    @Test
+    void update_WithSameDate_ShouldNotCheckForDuplicates() {
+        Long exerciseId = 1L;
+        LocalDateTime sameDate = LocalDateTime.of(2024, 1, 15, 10, 0);
 
-    ExerciseEntity existingExercise = new ExerciseEntity();
-    existingExercise.setId(exerciseId);
-    existingExercise.setDate(oldDate); 
-    existingExercise.setDescription("Old Exercise");
-    existingExercise.setGroup(testGroup);
-    existingExercise.setDiscipline(testDiscipline);
+        ExerciseDto updateDto = new ExerciseDto();
+        updateDto.setDate("2024-01-15T10:00");
+        updateDto.setDescription("Updated Exercise");
+        updateDto.setGroupId(1L);
+        updateDto.setDisciplineId(1L);
 
-    doReturn(existingExercise).when(exerciseService).get(exerciseId);
-    when(exerciseRepository.findByDate(newDate)).thenReturn(Optional.of(duplicateExercise));
+        ExerciseEntity existingExercise = new ExerciseEntity();
+        existingExercise.setId(exerciseId);
+        existingExercise.setDate(sameDate);
+        existingExercise.setDescription("Old Exercise");
+        existingExercise.setGroup(testGroup);
+        existingExercise.setDiscipline(testDiscipline);
 
-    assertThrows(IllegalArgumentException.class, () -> exerciseService.update(exerciseId, updateDto));
-    verify(exerciseRepository).findByDate(newDate);
-    verify(exerciseRepository, never()).save(any());
-}
+        doReturn(existingExercise).when(exerciseService).get(exerciseId);
+        when(exerciseRepository.save(any(ExerciseEntity.class))).thenReturn(existingExercise);
 
+        ExerciseEntity result = exerciseService.update(exerciseId, updateDto);
+
+        assertNotNull(result);
+        verify(exerciseRepository, never()).findByDate(any());
+        verify(exerciseRepository).save(any(ExerciseEntity.class));
+    }
+
+    @Test
+    void update_WithNewDateThatIsDuplicateOfOtherExercise_ShouldThrowIllegalArgumentException() {
+        Long exerciseId = 1L;
+        LocalDateTime oldDate = LocalDateTime.of(2024, 1, 15, 10, 0);
+        LocalDateTime newDate = LocalDateTime.of(2024, 1, 16, 11, 0);
+
+        ExerciseEntity duplicateExercise = new ExerciseEntity();
+        duplicateExercise.setId(2L);
+        duplicateExercise.setDate(newDate);
+
+        ExerciseDto updateDto = new ExerciseDto();
+        updateDto.setDate("2024-01-16T11:00");
+        updateDto.setDescription("Updated Exercise");
+        updateDto.setGroupId(1L);
+        updateDto.setDisciplineId(1L);
+
+        ExerciseEntity existingExercise = new ExerciseEntity();
+        existingExercise.setId(exerciseId);
+        existingExercise.setDate(oldDate);
+        existingExercise.setDescription("Old Exercise");
+        existingExercise.setGroup(testGroup);
+        existingExercise.setDiscipline(testDiscipline);
+
+        doReturn(existingExercise).when(exerciseService).get(exerciseId);
+
+        when(exerciseRepository.findByDateAndGroupIdAndDisciplineId(
+                eq(newDate), eq(testGroup.getId()), eq(testDiscipline.getId())))
+                .thenReturn(Optional.of(duplicateExercise));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> exerciseService.update(exerciseId, updateDto));
+
+        verify(exerciseRepository).findByDateAndGroupIdAndDisciplineId(
+                eq(newDate), eq(testGroup.getId()), eq(testDiscipline.getId()));
+        verify(exerciseRepository, never()).save(any());
+    }
 
 }

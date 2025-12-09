@@ -137,14 +137,17 @@ class DisciplineServiceTest {
     @Test
     void delete_WithExistingDiscipline_ShouldDeleteDiscipline() {
         Long disciplineId = 1L;
-        when(disciplineRepository.findByIdWithGroups(disciplineId))
-                .thenReturn(Optional.of(testDiscipline));
+
+        when(disciplineRepository.findById(disciplineId)).thenReturn(Optional.of(testDiscipline));
+
+        testDiscipline.setGroups(new HashSet<>());
+        testDiscipline.setTeachers(new HashSet<>());
 
         DisciplineEntity result = disciplineService.delete(disciplineId);
 
         assertNotNull(result);
         assertEquals(disciplineId, result.getId());
-        verify(disciplineRepository).findByIdWithGroups(disciplineId);
+        verify(disciplineRepository).findById(disciplineId);
         verify(disciplineRepository).delete(testDiscipline);
     }
 
