@@ -2,6 +2,7 @@ package demo.services;
 
 import demo.core.error.NotFoundException;
 import demo.models.DisciplineEntity;
+import demo.models.ExerciseEntity;
 import demo.models.GroupEntity;
 import demo.models.UserEntity;
 import demo.models.UserRole;
@@ -11,6 +12,7 @@ import demo.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -90,10 +92,24 @@ public class DisciplineService {
 
     @Transactional
     public DisciplineEntity delete(Long id) {
-        logger.info("Удаление дисциплины {}", id);
-        var exists = self.get(id);
-        repository.delete(exists);
-        return exists;
+        DisciplineEntity discipline = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Дисциплина не найдена"));
+
+        for (GroupEntity group : discipline.getGroups()) {
+            group.getDisciplines().remove(discipline);
+        }
+        discipline.getGroups().clear();
+
+        discipline.getTeachers().clear();
+        for (ExerciseEntity exercise : new HashSet<>(discipline.getGroups()
+                .stream()
+                .flatMap(g -> g.getExercises().stream())
+                .filter(e -> e.getDiscipline().equals(discipline))
+                .toList())) {
+            exercise.getGroup().getExercises().remove(exercise);
+        }
+        repository.delete(discipline);
+        return discipline;
     }
 
     @Transactional

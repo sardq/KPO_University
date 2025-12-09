@@ -1,11 +1,12 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import classNames from 'classnames';
 import MyToast from './MyToast';
 import { Link } from 'react-router-dom'; 
+import  {AuthContent} from './AuthContent'
 
 const LoginForm = ({ onLogin, showToast, setShowToast }) => {
-
+  const {setIs2FAVerified} = useContext(AuthContent);
   const [formData, setFormData] = useState({
     login: '',
     password: ''
@@ -45,6 +46,7 @@ const LoginForm = ({ onLogin, showToast, setShowToast }) => {
   };
 
   const handleLoginSubmit = (e) => {
+    setIs2FAVerified(false);
     e.preventDefault();
     if (!validate()) return;
 

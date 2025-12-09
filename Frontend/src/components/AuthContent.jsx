@@ -4,5 +4,7 @@ export const AuthContent = React.createContext({
   role: null,
   setRole: () => {},
   email: null,
-  setEmail: () => {}
+  setEmail: () => {},
+  is2FAVerified: false,
+  setIs2FAVerified: () =>{}
 });

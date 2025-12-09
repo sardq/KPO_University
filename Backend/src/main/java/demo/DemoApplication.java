@@ -78,7 +78,6 @@ public class DemoApplication implements CommandLineRunner {
             final var g1 = groupService.create(new GroupEntity("ПМИ-21-1"));
             final var g2 = groupService.create(new GroupEntity("ПМИ-21-2"));
             final var g3 = groupService.create(new GroupEntity("ФИТ-22-1"));
-            groupService.addStudent(g1.getId(), u2.getId());
             groupService.addStudent(g1.getId(), u4.getId());
             groupService.addStudent(g2.getId(), u5.getId());
             groupService.addStudent(g3.getId(), u7.getId());
@@ -126,7 +125,7 @@ public class DemoApplication implements CommandLineRunner {
                 }
             });
 
-            exerciseService.create(new ExerciseDto() {
+            final var ex4 = exerciseService.create(new ExerciseDto() {
                 {
                     setDate("2024-03-04T12:00");
                     setGroupId(g2.getId());
@@ -135,7 +134,7 @@ public class DemoApplication implements CommandLineRunner {
                 }
             });
 
-            exerciseService.create(new ExerciseDto() {
+            final var ex5 = exerciseService.create(new ExerciseDto() {
                 {
                     setDate("2024-03-05T13:00");
                     setGroupId(g3.getId());
@@ -144,7 +143,7 @@ public class DemoApplication implements CommandLineRunner {
                 }
             });
 
-            exerciseService.create(new ExerciseDto() {
+            final var ex6 = exerciseService.create(new ExerciseDto() {
                 {
                     setDate("2024-03-06T14:00");
                     setGroupId(g3.getId());
@@ -155,27 +154,14 @@ public class DemoApplication implements CommandLineRunner {
 
             log.info("Create default grades");
 
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("3");
-                    setExerciseId(ex3.getId());
-                    setStudentId(u5.getId()); // ок
-                }
-            });
+            log.info("Create default grades");
 
             gradeService.create(new GradeDto() {
                 {
                     setValue("4");
-                    setExerciseId(ex3.getId());
-                    setStudentId(u5.getId());
-                }
-            });
-
-            gradeService.create(new GradeDto() {
-                {
-                    setValue("5");
                     setExerciseId(ex1.getId());
                     setStudentId(u4.getId());
+                    setDescription("Хорошо");
                 }
             });
 
@@ -184,10 +170,62 @@ public class DemoApplication implements CommandLineRunner {
                     setValue("4");
                     setExerciseId(ex2.getId());
                     setStudentId(u4.getId());
+                    setDescription("Хорошо");
+                }
+            });
+
+            gradeService.create(new GradeDto() {
+                {
+                    setValue("3");
+                    setExerciseId(ex3.getId());
+                    setStudentId(u5.getId());
+                    setDescription("Средний результат");
+                }
+            });
+            gradeService.create(new GradeDto() {
+                {
+                    setValue("2");
+                    setExerciseId(ex4.getId());
+                    setStudentId(u5.getId());
+                    setDescription("Недостаточно подготовлен");
+                }
+            });
+
+            gradeService.create(new GradeDto() {
+                {
+                    setValue("5");
+                    setExerciseId(ex5.getId());
+                    setStudentId(u3.getId());
+                    setDescription("Отличное понимание темы");
+                }
+            });
+            gradeService.create(new GradeDto() {
+                {
+                    setValue("4");
+                    setExerciseId(ex5.getId());
+                    setStudentId(u7.getId());
+                    setDescription("Хорошая работа");
+                }
+            });
+            gradeService.create(new GradeDto() {
+                {
+                    setValue("5");
+                    setExerciseId(ex6.getId());
+                    setStudentId(u3.getId());
+                    setDescription("Лучший проект в группе");
+                }
+            });
+            gradeService.create(new GradeDto() {
+                {
+                    setValue("4");
+                    setExerciseId(ex6.getId());
+                    setStudentId(u7.getId());
+                    setDescription("Хорошая работа");
                 }
             });
 
             log.info("Test data created successfully");
+
         }
     }
 }
