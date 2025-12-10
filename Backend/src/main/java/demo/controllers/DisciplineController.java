@@ -40,7 +40,7 @@ public class DisciplineController {
             @RequestParam(defaultValue = "0") int page) {
         logger.info("Запрос на получение всех дисциплин: page={}", page);
 
-        Page<DisciplineEntity> result = service.getAll(page, Constants.DEFUALT_PAGE_SIZE);
+        Page<DisciplineEntity> result = service.getAll(page, 100);
         return result.getContent()
                 .stream()
                 .map(modelMapper::toDto)
@@ -135,4 +135,18 @@ public class DisciplineController {
         List<DisciplineEntity> list = service.getDisciplinesByTeacher(teacherId);
         return list.stream().map(modelMapper::toDto).toList();
     }
+
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<List<DisciplineDto>> getDisciplinesByGroup(@PathVariable Long groupId) {
+        logger.info("Запрос на получение дисциплин по группе {}", groupId);
+
+        List<DisciplineEntity> disciplines = service.getDisciplinesByGroup(groupId);
+
+        List<DisciplineDto> dtoList = disciplines.stream()
+                .map(modelMapper::toDto)
+                .toList();
+
+        return ResponseEntity.ok(dtoList);
+    }
+
 }

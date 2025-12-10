@@ -336,4 +336,99 @@ class DisciplineServiceTest {
         assertTrue(result.isEmpty());
         verify(disciplineRepository).findByTeacherId(teacherId);
     }
+
+    @Test
+    void getDisciplinesByGroup_WithExistingGroupId_ShouldReturnDisciplines() {
+        Long groupId = 1L;
+
+        DisciplineEntity math = new DisciplineEntity("Mathematics");
+        math.setId(1L);
+
+        DisciplineEntity physics = new DisciplineEntity("Physics");
+        physics.setId(2L);
+
+        List<DisciplineEntity> expectedDisciplines = Arrays.asList(math, physics);
+
+        when(disciplineRepository.findByGroupId(groupId)).thenReturn(expectedDisciplines);
+
+        List<DisciplineEntity> result = disciplineService.getDisciplinesByGroup(groupId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Mathematics", result.get(0).getName());
+        assertEquals("Physics", result.get(1).getName());
+        verify(disciplineRepository, times(1)).findByGroupId(groupId);
+    }
+
+    @Test
+    void getDisciplinesByGroup_WithNonExistingGroupId_ShouldReturnEmptyList() {
+        Long groupId = 999L;
+
+        when(disciplineRepository.findByGroupId(groupId)).thenReturn(Collections.emptyList());
+
+        List<DisciplineEntity> result = disciplineService.getDisciplinesByGroup(groupId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(disciplineRepository, times(1)).findByGroupId(groupId);
+    }
+
+    @Test
+    void getDisciplinesByGroup_WithNullGroupId_ShouldHandleNull() {
+        Long groupId = null;
+
+        when(disciplineRepository.findByGroupId(null)).thenReturn(Collections.emptyList());
+
+        List<DisciplineEntity> result = disciplineService.getDisciplinesByGroup(groupId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(disciplineRepository, times(1)).findByGroupId(null);
+    }
+
+    @Test
+    void getDisciplinesByGroup_WithSingleDiscipline_ShouldReturnOneItem() {
+        Long groupId = 2L;
+
+        DisciplineEntity singleDiscipline = new DisciplineEntity("Chemistry");
+        singleDiscipline.setId(3L);
+        List<DisciplineEntity> expectedDisciplines = Collections.singletonList(singleDiscipline);
+
+        when(disciplineRepository.findByGroupId(groupId)).thenReturn(expectedDisciplines);
+
+        List<DisciplineEntity> result = disciplineService.getDisciplinesByGroup(groupId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Chemistry", result.get(0).getName());
+        assertEquals(3L, result.get(0).getId());
+        verify(disciplineRepository, times(1)).findByGroupId(groupId);
+    }
+
+    @Test
+    void getDisciplinesByGroup_ShouldMaintainOrderFromRepository() {
+        Long groupId = 1L;
+
+        DisciplineEntity discipline1 = new DisciplineEntity("Algebra");
+        discipline1.setId(1L);
+
+        DisciplineEntity discipline2 = new DisciplineEntity("Geometry");
+        discipline2.setId(2L);
+
+        DisciplineEntity discipline3 = new DisciplineEntity("Calculus");
+        discipline3.setId(3L);
+
+        List<DisciplineEntity> expectedDisciplines = Arrays.asList(discipline1, discipline2, discipline3);
+
+        when(disciplineRepository.findByGroupId(groupId)).thenReturn(expectedDisciplines);
+
+        List<DisciplineEntity> result = disciplineService.getDisciplinesByGroup(groupId);
+
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        assertEquals("Algebra", result.get(0).getName());
+        assertEquals("Geometry", result.get(1).getName());
+        assertEquals("Calculus", result.get(2).getName());
+        verify(disciplineRepository, times(1)).findByGroupId(groupId);
+    }
 }

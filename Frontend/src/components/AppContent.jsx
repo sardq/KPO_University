@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect } from 'react';
 import { request, setAuthHeader } from '../helpers/axios_helper';
 import { jwtDecode } from 'jwt-decode';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-
 import { AuthContent } from './AuthContent';
 import LoginForm from './LoginForm';
 import ProtectedRoute from "./ProtectedRoute";
@@ -16,6 +15,7 @@ import DisciplinePanel from './DisciplinePanel';
 import GroupPanel from './GroupPanel';
 import UserPanel from './UserPanel';
 import JournalPanel from './JournalPanel';
+import StudentJornal from './StudentJornal';
 import StatisticPanel from './StatisticPanel';
 
 const decodeToken = (token) => {
@@ -177,6 +177,14 @@ export default function AppContent() {
         element={
           <ProtectedRoute role={role} allowed={["STUDENT"]}>
             <StudentHome />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/studentJournalPanel"
+        element={
+          <ProtectedRoute role={role} allowed={["STUDENT"]}>
+            <StudentJornal />
           </ProtectedRoute>
         }
       />

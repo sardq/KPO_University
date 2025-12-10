@@ -233,7 +233,7 @@ class ExerciseControllerTest {
         List<ExerciseEntity> exercises = List.of(exercise1, exercise2);
         Page<ExerciseEntity> pageResult = new PageImpl<>(exercises);
         
-        when(service.getAll(page, 5)).thenReturn(pageResult);
+        when(service.getAll(page, 100)).thenReturn(pageResult);
         when(modelMapper.map(exercise1, ExerciseDto.class)).thenReturn(dto1);
         when(modelMapper.map(exercise2, ExerciseDto.class)).thenReturn(dto2);
         
@@ -244,7 +244,7 @@ class ExerciseControllerTest {
         assertEquals("Exercise 1", result.get(0).getDescription());
         assertEquals("Exercise 2", result.get(1).getDescription());
         
-        verify(service).getAll(page, 5);
+        verify(service).getAll(page, 100);
         verify(modelMapper).map(exercise1, ExerciseDto.class);
         verify(modelMapper).map(exercise2, ExerciseDto.class);
     }
@@ -266,14 +266,14 @@ class ExerciseControllerTest {
 
         Page<ExerciseEntity> pageResult = new PageImpl<>(List.of(exercise));
         
-        when(service.getAll(page, 5)).thenReturn(pageResult);
+        when(service.getAll(page, 100)).thenReturn(pageResult);
         when(modelMapper.map(exercise, ExerciseDto.class)).thenReturn(dto);
         
         List<ExerciseDto> result = controller.getAll(page);
         
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(service).getAll(page, 5);
+        verify(service).getAll(page, 100);
     }
 
     @Test
@@ -281,13 +281,13 @@ class ExerciseControllerTest {
         int page = 0;
         Page<ExerciseEntity> emptyPage = new PageImpl<>(List.of());
         
-        when(service.getAll(page, 5)).thenReturn(emptyPage);
+        when(service.getAll(page, 100)).thenReturn(emptyPage);
         
         List<ExerciseDto> result = controller.getAll(page);
         
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(service).getAll(page, 5);
+        verify(service).getAll(page, 100);
         verify(modelMapper, never()).map(any(), eq(ExerciseDto.class));
     }
 

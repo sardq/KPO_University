@@ -42,7 +42,7 @@ public class GradeController {
     @GetMapping
     public List<GradeDto> getAll() {
         logger.info("Получение всех оценок");
-        var result = service.getAll(0, Constants.DEFUALT_PAGE_SIZE);
+        var result = service.getAll(0, 100);
         return result.getContent()
                 .stream()
                 .map(this::toDto)
