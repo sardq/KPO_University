@@ -62,7 +62,8 @@ public class DemoApplication implements CommandLineRunner {
             final var u3 = userService.create(
                     new UserEntity("a.anna", "safasf@ufsfser.user", defpsw, "Аннова", "Анна", UserRole.STUDENT));
             final var u4 = userService.create(
-                    new UserEntity("a.anna2", "safasf1@ufsfser.user", defpsw, "Фамилия", "Анна", UserRole.STUDENT));
+                    new UserEntity("p.daniil", "daniilputincev91@gmail.com", defpsw, "Даниил", "Путинцев",
+                            UserRole.STUDENT));
             final var u5 = userService.create(
                     new UserEntity("a.anna3", "safasf2@ufsfser.user", defpsw, "ААААААААА", "Анна", UserRole.STUDENT));
             userService.create(

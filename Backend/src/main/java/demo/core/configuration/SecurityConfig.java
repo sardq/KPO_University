@@ -15,20 +15,18 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.annotation.Generated;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final UserAuthenticationEntryPoint userAuthenticationEntryPoint;
     private final UserAuthenticationProvider userAuthenticationProvider;
-    private final String adminRole = "ADMIN";
-    private final String teacherRole = "TEACHER";
-    private final String disciplineController = "/api/disciplines/**";
-    private final String groupController = "/api/groups/**";
-    private final String exerciseController = "/api/exercises/**";
-    private final String gradeController = "/api/grades/**";
+    private final static String adminRole = "ADMIN";
+    private final static String teacherRole = "TEACHER";
+    private final static String disciplineController = "/api/disciplines/**";
+    private final static String groupController = "/api/groups/**";
+    private final static String exerciseController = "/api/exercises/**";
+    private final static String gradeController = "/api/grades/**";
 
     public SecurityConfig(UserAuthenticationEntryPoint userAuthenticationEntryPoint,
             UserAuthenticationProvider userAuthenticationProvider) {
