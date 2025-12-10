@@ -5,7 +5,6 @@ import demo.models.UserEntity;
 import demo.models.UserRole;
 import demo.services.UserService;
 import demo.controllers.UserController;
-import demo.core.configuration.Constants;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,13 +43,13 @@ class UserControllerTest {
 
         Page<UserEntity> page = new PageImpl<>(List.of(user));
 
-        when(service.getAll(0, Constants.DEFUALT_PAGE_SIZE)).thenReturn(page);
+        when(service.getAll(0, 100)).thenReturn(page);
         when(mapper.map(user, UserDto.class)).thenReturn(dto);
 
         List<UserDto> result = controller.getAll(0);
 
         assertEquals(1, result.size());
-        verify(service).getAll(0, Constants.DEFUALT_PAGE_SIZE);
+        verify(service).getAll(0, 100);
         verify(mapper).map(user, UserDto.class);
     }
 
@@ -123,7 +122,6 @@ class UserControllerTest {
         assertEquals(dto, result);
         verify(service).delete(1L);
     }
-
 
     @Test
     void testGetCurrentUserAuthenticated() {

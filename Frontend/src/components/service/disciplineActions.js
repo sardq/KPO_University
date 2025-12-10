@@ -166,3 +166,14 @@ export const getDisciplinesTeacher = async (teacherId) => {
     throw error;
   }
 };
+
+
+export const GetDisciplinesByGroup = async (groupId) => {
+  try {
+    const response = await api.get(`${BASE_URL}/group/${groupId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in GetDisciplinesByGroup:", error.response?.data || error.message);
+    throw error;
+  }
+};

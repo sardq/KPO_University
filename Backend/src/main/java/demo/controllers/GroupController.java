@@ -68,7 +68,7 @@ public class GroupController {
             @RequestParam(defaultValue = "0") int page) {
         logger.info("Запрос на получение всех групп: page={}", page);
 
-        Page<GroupEntity> result = service.getAll(page, Constants.DEFUALT_PAGE_SIZE);
+        Page<GroupEntity> result = service.getAll(page, 100);
         return result.getContent()
                 .stream()
                 .map(modelMapper::toDto)

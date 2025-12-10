@@ -34,14 +34,14 @@ class GradeControllerTest {
 
         Page<GradeEntity> page = new PageImpl<>(List.of(entity));
 
-        when(service.getAll(0, 5)).thenReturn(page);
+        when(service.getAll(0, 100)).thenReturn(page);
         GradeController spyController = spy(controller);
         doReturn(dto).when(spyController).toDto(entity);
 
         List<GradeDto> result = spyController.getAll();
 
         assertEquals(1, result.size());
-        verify(service).getAll(0, 5);
+        verify(service).getAll(0, 100);
         verify(spyController).toDto(entity);
     }
 
@@ -155,13 +155,13 @@ class GradeControllerTest {
     @Test
     void testGetAll_Empty() {
         Page<GradeEntity> emptyPage = new PageImpl<>(List.of());
-        when(service.getAll(0, 5)).thenReturn(emptyPage);
+        when(service.getAll(0, 100)).thenReturn(emptyPage);
 
         List<GradeDto> result = controller.getAll();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(service).getAll(0, 5);
+        verify(service).getAll(0, 100);
     }
 
     @Test

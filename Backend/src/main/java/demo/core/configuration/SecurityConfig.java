@@ -21,6 +21,12 @@ public class SecurityConfig {
 
     private final UserAuthenticationEntryPoint userAuthenticationEntryPoint;
     private final UserAuthenticationProvider userAuthenticationProvider;
+    private final static String adminRole = "ADMIN";
+    private final static String teacherRole = "TEACHER";
+    private final static String disciplineController = "/api/disciplines/**";
+    private final static String groupController = "/api/groups/**";
+    private final static String exerciseController = "/api/exercises/**";
+    private final static String gradeController = "/api/grades/**";
 
     public SecurityConfig(UserAuthenticationEntryPoint userAuthenticationEntryPoint,
             UserAuthenticationProvider userAuthenticationProvider) {
@@ -44,11 +50,33 @@ public class SecurityConfig {
                                 "/api/otp/**")
                         .permitAll()
                         .requestMatchers("/api/protocol/**")
-                        .hasRole("TEACHER")
+                        .hasRole(teacherRole)
                         .requestMatchers(HttpMethod.POST, "/api/users/**")
-                        .hasRole("ADMIN")
-                        .requestMatchers("/api/disciplines/**", "/api/groups/**", "/api/grades/**", "/api/exercises/**")
-                        .hasAnyRole("TEACHER", "ADMIN")
+                        .hasRole(adminRole)
+                        .requestMatchers(HttpMethod.GET,
+                                disciplineController,
+                                groupController,
+                                exerciseController,
+                                gradeController)
+                        .hasAnyRole("STUDENT", teacherRole, adminRole)
+                        .requestMatchers(HttpMethod.POST,
+                                disciplineController,
+                                groupController,
+                                exerciseController,
+                                gradeController)
+                        .hasAnyRole(teacherRole, adminRole)
+                        .requestMatchers(HttpMethod.PUT,
+                                disciplineController,
+                                groupController,
+                                exerciseController,
+                                gradeController)
+                        .hasAnyRole(teacherRole, adminRole)
+                        .requestMatchers(HttpMethod.DELETE,
+                                disciplineController,
+                                groupController,
+                                exerciseController,
+                                gradeController)
+                        .hasAnyRole(teacherRole, adminRole)
                         .requestMatchers("/api/user/me",
                                 "/api/users/me")
                         .authenticated()
@@ -57,7 +85,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));

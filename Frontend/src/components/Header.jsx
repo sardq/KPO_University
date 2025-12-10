@@ -42,7 +42,12 @@ export default function Header({ pageTitle, logoSrc }) {
             <div className="user-info me-3">
               <span className="text-light">{email}</span>
             </div>
-
+            {role === 'STUDENT' && (
+              <div className="admin-nav d-flex me-2">
+                <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/userHome')}>Главная</button>
+                <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/studentJournalPanel')}>Журнал</button>
+              </div>
+            )}
             {role === 'ADMIN' && (
               <div className="admin-nav d-flex me-2">
                 <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/adminHome')}>Главная</button>

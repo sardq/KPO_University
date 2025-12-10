@@ -45,7 +45,7 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page) {
         logger.info("Запрос на получение всех пользователей: page={}", page);
 
-        Page<UserEntity> result = userService.getAll(page, Constants.DEFUALT_PAGE_SIZE);
+        Page<UserEntity> result = userService.getAll(page, 100);
         return result.getContent()
                 .stream()
                 .map(this::toDto)

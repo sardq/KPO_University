@@ -14,7 +14,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,13 +42,13 @@ class DisciplineControllerTest {
         DisciplineDto dto = new DisciplineDto();
         Page<DisciplineEntity> page = new PageImpl<>(List.of(entity));
 
-        when(service.getAll(0, 5)).thenReturn(page);
+        when(service.getAll(0, 100)).thenReturn(page);
         when(mapper.toDto(entity)).thenReturn(dto);
 
         List<DisciplineDto> result = controller.getAll(0);
 
         assertEquals(1, result.size());
-        verify(service).getAll(0, 5);
+        verify(service).getAll(0, 100);
         verify(mapper).toDto(entity);
     }
 
@@ -222,5 +225,190 @@ class DisciplineControllerTest {
         assertTrue(result.isEmpty());
         verify(service).getDisciplinesByTeacher(teacherId);
         verify(mapper, never()).toDto(any());
+    }
+
+    @Test
+    void testGetDisciplinesByGroup_WithValidGroupId_ShouldReturnDisciplines() {
+        Long groupId = 1L;
+
+        DisciplineEntity math = new DisciplineEntity("Mathematics");
+        math.setId(1L);
+
+        DisciplineEntity physics = new DisciplineEntity("Physics");
+        physics.setId(2L);
+
+        List<DisciplineEntity> disciplines = Arrays.asList(math, physics);
+
+        DisciplineDto mathDto = new DisciplineDto();
+        mathDto.setId(1L);
+        mathDto.setName("Mathematics");
+
+        DisciplineDto physicsDto = new DisciplineDto();
+        physicsDto.setId(2L);
+        physicsDto.setName("Physics");
+
+        when(service.getDisciplinesByGroup(groupId)).thenReturn(disciplines);
+        when(mapper.toDto(math)).thenReturn(mathDto);
+        when(mapper.toDto(physics)).thenReturn(physicsDto);
+
+        ResponseEntity<List<DisciplineDto>> response = controller.getDisciplinesByGroup(groupId);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        assertEquals("Mathematics", response.getBody().get(0).getName());
+        assertEquals("Physics", response.getBody().get(1).getName());
+
+        verify(service, times(1)).getDisciplinesByGroup(groupId);
+        verify(mapper, times(2)).toDto(any(DisciplineEntity.class));
+    }
+
+    @Test
+    void testGetDisciplinesByGroup_WithEmptyResult_ShouldReturnEmptyList() {
+        Long groupId = 999L;
+
+        when(service.getDisciplinesByGroup(groupId)).thenReturn(Collections.emptyList());
+
+        ResponseEntity<List<DisciplineDto>> response = controller.getDisciplinesByGroup(groupId);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+
+        verify(service, times(1)).getDisciplinesByGroup(groupId);
+        verify(mapper, never()).toDto(any(DisciplineEntity.class));
+    }
+
+    @Test
+    void testGetDisciplinesByGroup_WithSingleDiscipline_ShouldReturnOneItem() {
+        Long groupId = 2L;
+
+        DisciplineEntity chemistry = new DisciplineEntity("Chemistry");
+        chemistry.setId(3L);
+        List<DisciplineEntity> disciplines = Collections.singletonList(chemistry);
+
+        DisciplineDto chemistryDto = new DisciplineDto();
+        chemistryDto.setId(3L);
+        chemistryDto.setName("Chemistry");
+
+        when(service.getDisciplinesByGroup(groupId)).thenReturn(disciplines);
+        when(mapper.toDto(chemistry)).thenReturn(chemistryDto);
+
+        ResponseEntity<List<DisciplineDto>> response = controller.getDisciplinesByGroup(groupId);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
+        assertEquals("Chemistry", response.getBody().get(0).getName());
+
+        verify(service, times(1)).getDisciplinesByGroup(groupId);
+        verify(mapper, times(1)).toDto(chemistry);
+    }
+
+    @Test
+    void testGetDisciplinesByGroup_ShouldLogRequest() {
+        Long groupId = 1L;
+
+        DisciplineEntity discipline = new DisciplineEntity("Mathematics");
+        discipline.setId(1L);
+        List<DisciplineEntity> disciplines = Collections.singletonList(discipline);
+
+        DisciplineDto dto = new DisciplineDto();
+        dto.setId(1L);
+        dto.setName("Mathematics");
+
+        when(service.getDisciplinesByGroup(groupId)).thenReturn(disciplines);
+        when(mapper.toDto(discipline)).thenReturn(dto);
+
+        ResponseEntity<List<DisciplineDto>> response = controller.getDisciplinesByGroup(groupId);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+
+        verify(service, times(1)).getDisciplinesByGroup(groupId);
+    }
+
+    @Test
+    void testGetDisciplinesByGroup_WithRepositoryException_ShouldPropagateException() {
+        Long groupId = 1L;
+        RuntimeException exception = new RuntimeException("Database connection failed");
+
+        when(service.getDisciplinesByGroup(groupId)).thenThrow(exception);
+
+        assertThrows(RuntimeException.class, () -> controller.getDisciplinesByGroup(groupId));
+
+        verify(service, times(1)).getDisciplinesByGroup(groupId);
+        verify(mapper, never()).toDto(any(DisciplineEntity.class));
+    }
+
+    @Test
+    void testGetDisciplinesByGroup_ShouldMapAllEntitiesToDtos() {
+        Long groupId = 1L;
+
+        DisciplineEntity discipline1 = new DisciplineEntity("Math");
+        discipline1.setId(1L);
+
+        DisciplineEntity discipline2 = new DisciplineEntity("Physics");
+        discipline2.setId(2L);
+
+        DisciplineEntity discipline3 = new DisciplineEntity("Chemistry");
+        discipline3.setId(3L);
+
+        List<DisciplineEntity> disciplines = Arrays.asList(discipline1, discipline2, discipline3);
+
+        DisciplineDto dto1 = new DisciplineDto();
+        dto1.setId(1L);
+        dto1.setName("Math");
+
+        DisciplineDto dto2 = new DisciplineDto();
+        dto2.setId(2L);
+        dto2.setName("Physics");
+
+        DisciplineDto dto3 = new DisciplineDto();
+        dto3.setId(3L);
+        dto3.setName("Chemistry");
+
+        when(service.getDisciplinesByGroup(groupId)).thenReturn(disciplines);
+        when(mapper.toDto(discipline1)).thenReturn(dto1);
+        when(mapper.toDto(discipline2)).thenReturn(dto2);
+        when(mapper.toDto(discipline3)).thenReturn(dto3);
+
+        ResponseEntity<List<DisciplineDto>> response = controller.getDisciplinesByGroup(groupId);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(3, response.getBody().size());
+
+        verify(mapper, times(3)).toDto(any(DisciplineEntity.class));
+        verify(mapper, times(1)).toDto(discipline1);
+        verify(mapper, times(1)).toDto(discipline2);
+        verify(mapper, times(1)).toDto(discipline3);
+    }
+
+    @Test
+    void testGetDisciplinesByGroup_WithZeroGroupId_ShouldHandleZero() {
+        Long groupId = 0L;
+
+        DisciplineEntity discipline = new DisciplineEntity("General");
+        discipline.setId(1L);
+        List<DisciplineEntity> disciplines = Collections.singletonList(discipline);
+
+        DisciplineDto dto = new DisciplineDto();
+        dto.setId(1L);
+        dto.setName("General");
+
+        when(service.getDisciplinesByGroup(groupId)).thenReturn(disciplines);
+        when(mapper.toDto(discipline)).thenReturn(dto);
+
+        ResponseEntity<List<DisciplineDto>> response = controller.getDisciplinesByGroup(groupId);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(1, response.getBody().size());
+
+        verify(service, times(1)).getDisciplinesByGroup(groupId);
     }
 }

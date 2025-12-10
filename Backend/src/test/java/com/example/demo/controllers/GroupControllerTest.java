@@ -38,13 +38,13 @@ class GroupControllerTest {
 
         Page<GroupEntity> page = new PageImpl<>(List.of(entity));
 
-        when(service.getAll(0, 5)).thenReturn(page);
+        when(service.getAll(0,100)).thenReturn(page);
         when(mapper.toDto(entity)).thenReturn(dto);
 
         List<GroupDto> result = controller.getAll(0);
 
         assertEquals(1, result.size());
-        verify(service).getAll(0, 5);
+        verify(service).getAll(0, 100);
     }
 
     @Test

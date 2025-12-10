@@ -63,7 +63,7 @@ public class ExerciseController {
             @RequestParam(defaultValue = "0") int page) {
         logger.info("Запрос на получение всех занятий: page={}", page);
 
-        Page<ExerciseEntity> result = service.getAll(page, Constants.DEFUALT_PAGE_SIZE);
+        Page<ExerciseEntity> result = service.getAll(page, 100);
         return result.getContent()
                 .stream()
                 .map(this::toDto)

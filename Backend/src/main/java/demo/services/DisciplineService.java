@@ -204,4 +204,9 @@ public class DisciplineService {
     public List<DisciplineEntity> getDisciplinesByTeacher(Long teacherId) {
         return repository.findByTeacherId(teacherId);
     }
+
+    public List<DisciplineEntity> getDisciplinesByGroup(Long groupId) {
+        return repository.findByGroupId(groupId);
+    }
+
 }
