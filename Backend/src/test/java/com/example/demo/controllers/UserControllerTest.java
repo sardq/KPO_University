@@ -5,7 +5,6 @@ import demo.models.UserEntity;
 import demo.models.UserRole;
 import demo.services.UserService;
 import demo.controllers.UserController;
-import demo.core.configuration.Constants;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

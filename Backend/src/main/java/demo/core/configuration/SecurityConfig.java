@@ -15,12 +15,21 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.annotation.Generated;
+
 @Configuration
 @EnableWebSecurity
+@Generated("ExcludedFromCoverage")
 public class SecurityConfig {
 
     private final UserAuthenticationEntryPoint userAuthenticationEntryPoint;
     private final UserAuthenticationProvider userAuthenticationProvider;
+    private final String adminRole = "ADMIN";
+    private final String teacherRole = "TEACHER";
+    private final String disciplineController = "/api/disciplines/**";
+    private final String groupController = "/api/groups/**";
+    private final String exerciseController = "/api/exercises/**";
+    private final String gradeController = "/api/grades/**";
 
     public SecurityConfig(UserAuthenticationEntryPoint userAuthenticationEntryPoint,
             UserAuthenticationProvider userAuthenticationProvider) {
@@ -44,33 +53,33 @@ public class SecurityConfig {
                                 "/api/otp/**")
                         .permitAll()
                         .requestMatchers("/api/protocol/**")
-                        .hasRole("TEACHER")
+                        .hasRole(teacherRole)
                         .requestMatchers(HttpMethod.POST, "/api/users/**")
-                        .hasRole("ADMIN")
+                        .hasRole(adminRole)
                         .requestMatchers(HttpMethod.GET,
-                                "/api/disciplines/**",
-                                "/api/groups/**",
-                                "/api/exercises/**",
-                                "/api/grades/**")
-                        .hasAnyRole("STUDENT", "TEACHER", "ADMIN")
+                                disciplineController,
+                                groupController,
+                                exerciseController,
+                                gradeController)
+                        .hasAnyRole("STUDENT", teacherRole, adminRole)
                         .requestMatchers(HttpMethod.POST,
-                                "/api/disciplines/**",
-                                "/api/groups/**",
-                                "/api/exercises/**",
-                                "/api/grades/**")
-                        .hasAnyRole("TEACHER", "ADMIN")
+                                disciplineController,
+                                groupController,
+                                exerciseController,
+                                gradeController)
+                        .hasAnyRole(teacherRole, adminRole)
                         .requestMatchers(HttpMethod.PUT,
-                                "/api/disciplines/**",
-                                "/api/groups/**",
-                                "/api/exercises/**",
-                                "/api/grades/**")
-                        .hasAnyRole("TEACHER", "ADMIN")
+                                disciplineController,
+                                groupController,
+                                exerciseController,
+                                gradeController)
+                        .hasAnyRole(teacherRole, adminRole)
                         .requestMatchers(HttpMethod.DELETE,
-                                "/api/disciplines/**",
-                                "/api/groups/**",
-                                "/api/exercises/**",
-                                "/api/grades/**")
-                        .hasAnyRole("TEACHER", "ADMIN")
+                                disciplineController,
+                                groupController,
+                                exerciseController,
+                                gradeController)
+                        .hasAnyRole(teacherRole, adminRole)
                         .requestMatchers("/api/user/me",
                                 "/api/users/me")
                         .authenticated()
@@ -79,7 +88,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
