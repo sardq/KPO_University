@@ -19,7 +19,6 @@ import jakarta.annotation.Generated;
 
 @Configuration
 @EnableWebSecurity
-@Generated("ExcludedFromCoverage")
 public class SecurityConfig {
 
     private final UserAuthenticationEntryPoint userAuthenticationEntryPoint;
