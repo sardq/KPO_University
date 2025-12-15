@@ -45,7 +45,7 @@ export default function Header({ pageTitle, logoSrc }) {
             {role === 'STUDENT' && (
               <div className="admin-nav d-flex me-2">
                 <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/userHome')}>Главная</button>
-                <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/studentJournalPanel')}>Журнал</button>
+                <button className="btn btn-outline-light btn-sm" onClick={() => handleNavigate('/studentJournalPanel')}>Журнал</button>
               </div>
             )}
             {role === 'ADMIN' && (
@@ -53,7 +53,7 @@ export default function Header({ pageTitle, logoSrc }) {
                 <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/adminHome')}>Главная</button>
                 <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/userPanel')}>Пользователи</button>
                 <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/groupPanel')}>Группы</button>
-                <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/disciplinePanel')}>Дисциплины</button>
+                <button className="btn btn-outline-light btn-sm" onClick={() => handleNavigate('/disciplinePanel')}>Дисциплины</button>
               </div>
             )}
 
@@ -61,10 +61,10 @@ export default function Header({ pageTitle, logoSrc }) {
               <div className="teacher-nav d-flex me-2">
                 <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/teacherHome')}>Главная</button>
                 <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/journalPanel')}>Журнал</button>
-                <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/statisticPanel')}>Статистика</button>
+                <button className="btn btn-outline-light btn-sm" onClick={() => handleNavigate('/statisticPanel')}>Статистика</button>
               </div>
             )}
-
+            <button className="btn btn-outline-light btn-sm me-2" onClick={() => handleNavigate('/profile')}>Профиль</button>
             <button 
               className="btn btn-outline-danger btn-sm"
               onClick={handleLogout}

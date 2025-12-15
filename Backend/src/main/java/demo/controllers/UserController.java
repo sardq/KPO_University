@@ -4,6 +4,7 @@ import demo.dto.UserDto;
 import demo.models.UserEntity;
 import demo.services.UserService;
 import demo.core.configuration.Constants;
+import demo.core.configuration.UserAuthenticationProvider;
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -15,21 +16,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(UserController.URL)
 public class UserController {
     public static final String URL = Constants.API_URL + "/users";
-
+    private final UserAuthenticationProvider authProvider;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
     private final ModelMapper modelMapper;
 
-    public UserController(UserService userService, ModelMapper modelMapper) {
+    public UserController(UserService userService, ModelMapper modelMapper, UserAuthenticationProvider authProvider) {
         this.userService = userService;
         this.modelMapper = modelMapper;
+        this.authProvider = authProvider;
     }
 
     private UserDto toDto(UserEntity entity) {
@@ -125,5 +129,16 @@ public class UserController {
 
         Page<UserEntity> result = userService.searchStudentsWithoutGroup(search, page, pageSize);
         return result.map(this::toDto);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Map<String, Object>> updateAdmin(@PathVariable Long id, @RequestBody UserDto userDto) {
+        UserEntity updated = userService.update(id, toEntity(userDto));
+
+        String token = authProvider.createToken(updated.getLogin(), updated.getRole().name());
+
+        return ResponseEntity.ok(Map.of(
+                "user", toDto(updated),
+                "token", token));
     }
 }

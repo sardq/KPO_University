@@ -90,4 +90,19 @@ public class ExerciseController {
         ExerciseEntity deleted = service.delete(id);
         return toDto(deleted);
     }
+
+    @GetMapping("/by-discipline-group/{disciplineId}/{groupId}/page")
+    public Page<ExerciseDto> getByDisciplineAndGroupPage(
+            @PathVariable Long disciplineId,
+            @PathVariable Long groupId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        logger.info("Запрос занятий с пагинацией по дисциплине {} и группе {}: page={}, size={}",
+                disciplineId, groupId, page, size);
+
+        Page<ExerciseEntity> result = service.getByDisciplineAndGroup(disciplineId, groupId, page, size);
+        return result.map(this::toDto);
+    }
+
 }

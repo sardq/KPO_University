@@ -42,4 +42,15 @@ public interface ExerciseRepository extends CrudRepository<ExerciseEntity, Long>
             @Param("date") LocalDateTime date,
             @Param("groupId") Long groupId,
             @Param("disciplineId") Long disciplineId);
+
+    @Query("""
+            SELECT e FROM ExerciseEntity e
+            WHERE e.discipline.id = :disciplineId
+            AND e.group.id = :groupId
+            """)
+    Page<ExerciseEntity> findByDisciplineIdAndGroupId(
+            @Param("disciplineId") Long disciplineId,
+            @Param("groupId") Long groupId,
+            Pageable pageable);
+
 }
