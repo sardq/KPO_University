@@ -22,11 +22,11 @@ import java.security.NoSuchAlgorithmException;
 @Service
 public class LogService {
 
-    public final MinioClient minioClient;
     private static final Logger logger = LoggerFactory.getLogger(LogService.class);
+    public final MinioClient minioClient;
 
     @Value("${minio.bucket}")
-        public String bucketName;
+    public String bucketName;
 
     public LogService(
             @Value("${minio.url}") String url,
@@ -53,14 +53,12 @@ public class LogService {
                             .object(objectName)
                             .stream(is, Files.size(path), -1)
                             .contentType("text/plain")
-                            .build()
-            );
+                            .build());
             logger.info("Лог успешно загружен: {}", objectName);
         } catch (IOException | MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
-            logger.error("Ошибка при загрузке файла {} в MinIO", objectName, e);
-            throw new LogServiceException(
-                    "Не удалось загрузить файл в MinIO: " + filePath + " -> " + objectName, e
-            );
+            String msg = String.format("Не удалось загрузить файл в MinIO: %s -> %s", filePath, objectName);
+            logger.error(msg, e);
+            throw new LogServiceException(msg, e);
         }
     }
 
@@ -72,16 +70,13 @@ public class LogService {
                     GetObjectArgs.builder()
                             .bucket(bucketName)
                             .object(objectName)
-                            .build()
-            );
+                            .build());
             logger.info("Лог успешно получен: {}", objectName);
             return is;
         } catch (IOException | MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
-            logger.error("Ошибка при загрузке файла {} с MinIO", objectName, e);
-            throw new LogServiceException(
-                    "Не удалось скачать файл из MinIO: " + objectName, e
-            );
+            String msg = String.format("Не удалось скачать файл из MinIO: %s", objectName);
+            logger.error(msg, e);
+            throw new LogServiceException(msg, e);
         }
     }
-
 }

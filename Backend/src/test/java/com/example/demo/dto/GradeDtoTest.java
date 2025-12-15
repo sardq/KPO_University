@@ -294,7 +294,6 @@ class GradeDtoTest {
     @Test
     void testStaticFromEntityMethodIsStatic() {
 
-        // Arrange
         GradeEntity entity = new GradeEntity();
         entity.setId(1L);
         entity.setValue(GradeEnum.FOUR);
@@ -305,10 +304,8 @@ class GradeDtoTest {
         student.setId(20L);
         entity.setStudent(student);
 
-        // Act - вызываем статический метод без создания экземпляра
         GradeDto result = GradeDto.fromEntity(entity);
 
-        // Assert
         assertNotNull(result);
         assertEquals(1L, result.getId());
     }

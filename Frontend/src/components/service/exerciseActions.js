@@ -28,10 +28,19 @@ export const getAllExercises = async (page = 0) => {
     const response = await api.get(BASE_URL, { params: { page } });
     return response.data;
 };
+
 export const getByDisciplineAndGroup = async (disciplineId,groupId) => {
  const response = await api.get(`${BASE_URL}/by-discipline-group/${disciplineId}/${groupId}`);
     return response.data;
 };
+export const getByDisciplineAndGroupPage = async (disciplineId, groupId, page = 0, size = 5) => {
+  const response = await api.get(`${BASE_URL}/by-discipline-group/${disciplineId}/${groupId}/page`, {
+    params: { page, size }
+  });
+  if (response === null) return response;
+  return response.data;
+};
+
 export const saveExercise = async (exerciseData) => {
     const response = await api.post(`${BASE_URL}/create`, exerciseData);
     return response.data;
@@ -45,5 +54,7 @@ export const updateExercise = async (id, exerciseData) => {
 
 export const deleteExercise = async (id) => {
     const response = await api.post(`${BASE_URL}/delete/${id}`);
+    console.log(response);
+
     return response.data;
 };

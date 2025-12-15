@@ -1,5 +1,6 @@
 package demo.services;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -46,7 +47,11 @@ public class JournalReportService {
         var teacher = discipline.getTeachers().stream().findFirst().orElse(null);
         dto.setTeacherName(teacher != null ? teacher.getFirstName() + " " + teacher.getLastName() : "");
 
-        var lessons = lessonRepo.findByDisciplineIdAndGroupId(disciplineId, groupId);
+        var lessons = lessonRepo.findByDisciplineIdAndGroupId(disciplineId, groupId)
+                .stream()
+                .sorted(Comparator.comparing(ExerciseEntity::getDate))
+                .toList();
+
         var lessonDates = lessons.stream().map(ExerciseEntity::getDate).toList();
         dto.setLessonDates(lessonDates);
 

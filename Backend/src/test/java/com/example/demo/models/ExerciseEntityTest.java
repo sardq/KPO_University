@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ExerciseEntityTest {
 
-   private ExerciseEntity exercise1;
+    private ExerciseEntity exercise1;
     private ExerciseEntity exercise2;
     private ExerciseEntity exercise3;
-    
+
     private LocalDateTime testDate;
     private GroupEntity testGroup;
     private DisciplineEntity testDiscipline;
@@ -26,21 +26,21 @@ class ExerciseEntityTest {
     void setUp() {
         testDate = LocalDateTime.of(2024, 1, 15, 10, 30, 0);
         testDescription = "Test Exercise Description";
-        
+
         testGroup = new GroupEntity();
         testGroup.setId(1L);
         testGroup.setName("Test Group");
-        
+
         testDiscipline = new DisciplineEntity();
         testDiscipline.setId(1L);
         testDiscipline.setName("Test Discipline");
-        
+
         exercise1 = new ExerciseEntity(testDate, testDescription, testGroup, testDiscipline);
         exercise1.setId(1L);
-        
+
         exercise2 = new ExerciseEntity(testDate, testDescription, testGroup, testDiscipline);
         exercise2.setId(1L);
-        
+
         exercise3 = new ExerciseEntity(testDate, testDescription, testGroup, testDiscipline);
         exercise3.setId(2L);
     }
@@ -80,6 +80,7 @@ class ExerciseEntityTest {
         e3.setId(2L);
         assertNotEquals(e1, e3);
     }
+
     @Test
     void testConstructor() {
         LocalDateTime date = LocalDateTime.of(2024, 1, 16, 14, 0);
@@ -88,9 +89,9 @@ class ExerciseEntityTest {
         group.setId(2L);
         DisciplineEntity discipline = new DisciplineEntity();
         discipline.setId(2L);
-        
+
         ExerciseEntity exercise = new ExerciseEntity(date, description, group, discipline);
-        
+
         assertNotNull(exercise);
         assertEquals(date, exercise.getDate());
         assertEquals(description, exercise.getDescription());
@@ -101,7 +102,7 @@ class ExerciseEntityTest {
     @Test
     void testConstructor_WithNullValues() {
         ExerciseEntity exercise = new ExerciseEntity(null, null, null, null);
-        
+
         assertNotNull(exercise);
         assertNull(exercise.getDate());
         assertNull(exercise.getDescription());
@@ -111,12 +112,12 @@ class ExerciseEntityTest {
 
     @Test
     void testEquals_WithSameObject() {
-        assertEquals( exercise1,exercise1 );
+        assertEquals(exercise1, exercise1);
     }
 
     @Test
     void testEquals_WithNull() {
-        assertNotEquals(exercise1,null);
+        assertNotEquals(null, exercise1);
     }
 
     @Test
@@ -133,29 +134,29 @@ class ExerciseEntityTest {
 
     @Test
     void testEquals_WithDifferentIds() {
-        assertNotEquals(exercise1,exercise3);
-        assertNotEquals(exercise3,exercise1);
+        assertNotEquals(exercise1, exercise3);
+        assertNotEquals(exercise3, exercise1);
     }
 
     @Test
     void testEquals_WithDifferentDates() {
         LocalDateTime differentDate = LocalDateTime.of(2024, 1, 16, 11, 0);
-        ExerciseEntity differentExercise = new ExerciseEntity(differentDate, testDescription, testGroup, testDiscipline);
+        ExerciseEntity differentExercise = new ExerciseEntity(differentDate, testDescription, testGroup,
+                testDiscipline);
         differentExercise.setId(1L);
-        
-        assertNotEquals(exercise1,differentExercise);
-    }
 
-    
+        assertNotEquals(exercise1, differentExercise);
+    }
 
     @Test
     void testEquals_WithDifferentGroups() {
         GroupEntity differentGroup = new GroupEntity();
         differentGroup.setId(2L);
-        
-        ExerciseEntity differentGroupExercise = new ExerciseEntity(testDate, testDescription, differentGroup, testDiscipline);
+
+        ExerciseEntity differentGroupExercise = new ExerciseEntity(testDate, testDescription, differentGroup,
+                testDiscipline);
         differentGroupExercise.setId(1L);
-        
+
         assertNotEquals(exercise1, differentGroupExercise);
     }
 
@@ -163,28 +164,28 @@ class ExerciseEntityTest {
     void testEquals_WithDifferentDisciplines() {
         DisciplineEntity differentDiscipline = new DisciplineEntity();
         differentDiscipline.setId(2L);
-        
-        ExerciseEntity differentDisciplineExercise = new ExerciseEntity(testDate, testDescription, testGroup, differentDiscipline);
-        differentDisciplineExercise.setId(1L);
-        
-        assertNotEquals(exercise1,differentDisciplineExercise);
-    }
 
+        ExerciseEntity differentDisciplineExercise = new ExerciseEntity(testDate, testDescription, testGroup,
+                differentDiscipline);
+        differentDisciplineExercise.setId(1L);
+
+        assertNotEquals(exercise1, differentDisciplineExercise);
+    }
 
     @Test
     void testEquals_TransitiveProperty() {
         ExerciseEntity exerciseA = new ExerciseEntity(testDate, testDescription, testGroup, testDiscipline);
         exerciseA.setId(1L);
-        
+
         ExerciseEntity exerciseB = new ExerciseEntity(testDate, testDescription, testGroup, testDiscipline);
         exerciseB.setId(1L);
-        
+
         ExerciseEntity exerciseC = new ExerciseEntity(testDate, testDescription, testGroup, testDiscipline);
         exerciseC.setId(1L);
-        
-        assertEquals(exerciseA,exerciseB);
-        assertEquals(exerciseB,exerciseC);
-        assertEquals(exerciseA,exerciseC);
+
+        assertEquals(exerciseA, exerciseB);
+        assertEquals(exerciseB, exerciseC);
+        assertEquals(exerciseA, exerciseC);
     }
 
     @Test
@@ -192,7 +193,7 @@ class ExerciseEntityTest {
         boolean firstResult = exercise1.equals(exercise2);
         boolean secondResult = exercise1.equals(exercise2);
         boolean thirdResult = exercise1.equals(exercise2);
-        
+
         assertEquals(firstResult, secondResult);
         assertEquals(secondResult, thirdResult);
     }
@@ -201,7 +202,7 @@ class ExerciseEntityTest {
     void testHashCode_Consistency() {
         int firstHashCode = exercise1.hashCode();
         int secondHashCode = exercise1.hashCode();
-        
+
         assertEquals(firstHashCode, secondHashCode);
     }
 
@@ -219,39 +220,36 @@ class ExerciseEntityTest {
     void testHashCode_WithNullFields() {
         ExerciseEntity exerciseWithNulls = new ExerciseEntity(null, null, null, null);
         exerciseWithNulls.setId(null);
-        
-        
+
         assertDoesNotThrow(() -> Objects.hash(null, null, null, null));
     }
 
     @Test
     void testSetDate_WithSecondsAndNanos() {
         LocalDateTime dateWithSeconds = LocalDateTime.of(2024, 1, 15, 10, 30, 45, 123456789);
-        
+
         ExerciseEntity exercise = new ExerciseEntity();
         exercise.setDate(dateWithSeconds);
-        
+
         LocalDateTime result = exercise.getDate();
-        
+
         assertNotNull(result);
         assertEquals(2024, result.getYear());
         assertEquals(1, result.getMonthValue());
         assertEquals(15, result.getDayOfMonth());
         assertEquals(10, result.getHour());
         assertEquals(30, result.getMinute());
-        assertEquals(0, result.getSecond()); 
-        assertEquals(0, result.getNano()); 
+        assertEquals(0, result.getSecond());
+        assertEquals(0, result.getNano());
     }
-
-   
 
     @Test
     void testSetDate_AlreadyWithoutSeconds() {
         LocalDateTime cleanDate = LocalDateTime.of(2024, 1, 15, 10, 30);
-        
+
         ExerciseEntity exercise = new ExerciseEntity();
         exercise.setDate(cleanDate);
-        
+
         assertEquals(cleanDate, exercise.getDate());
     }
 }

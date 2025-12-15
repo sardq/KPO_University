@@ -17,6 +17,7 @@ import UserPanel from './UserPanel';
 import JournalPanel from './JournalPanel';
 import StudentJornal from './StudentJornal';
 import StatisticPanel from './StatisticPanel';
+import ProfilePage from './ProfilePage';
 
 const decodeToken = (token) => {
   try {
@@ -236,7 +237,12 @@ export default function AppContent() {
           </ProtectedRoute>
         }
       />
-      
+      <Route
+        path="/profile"
+        element={
+            <ProfilePage />
+        }
+      />
       <Route
         path="*"
         element={

@@ -24,7 +24,7 @@ public class JournalReportControlService {
         this.minioClient = minioClient;
     }
 
-    private static final String bucketName = "protocols";
+    private static final String BUCKET_NAME = "protocols";
 
     public Long saveProtocol(JournalReportDto dto) {
         logger.info("Попытка сохранить протокол");
@@ -39,7 +39,7 @@ public class JournalReportControlService {
 
             minioClient.putObject(PutObjectArgs.builder()
                     .stream(new ByteArrayInputStream(pdf), pdf.length, -1)
-                    .bucket(bucketName)
+                    .bucket(BUCKET_NAME)
                     .object(filename)
                     .contentType("application/pdf")
                     .build());
@@ -54,7 +54,7 @@ public class JournalReportControlService {
         String filename = "protocol_" + id + ".pdf";
 
         try (InputStream is = minioClient.getObject(GetObjectArgs.builder()
-                .bucket(bucketName)
+                .bucket(BUCKET_NAME)
                 .object(filename)
                 .build())) {
 
@@ -69,12 +69,12 @@ public class JournalReportControlService {
     private void createBucketIfNotExists() {
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
-                    .bucket(bucketName)
+                    .bucket(BUCKET_NAME)
                     .build());
 
             if (!found) {
                 minioClient.makeBucket(MakeBucketArgs.builder()
-                        .bucket(bucketName)
+                        .bucket(BUCKET_NAME)
                         .build());
             }
         } catch (Exception e) {

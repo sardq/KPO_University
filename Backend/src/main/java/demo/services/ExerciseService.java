@@ -27,7 +27,7 @@ public class ExerciseService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExerciseService.class);
     private static final String LOG_RESPONSE = "Ответ: {}";
-    private static final Sort DEFAULT_SORT = Sort.by("date").descending();
+    private static final Sort DEFAULT_SORT = Sort.by("date").ascending();
 
     private final ExerciseRepository repository;
     private final GroupRepository groupRepository;
@@ -157,4 +157,15 @@ public class ExerciseService {
         logger.info("Занятие удалено");
         return existing;
     }
+
+    @Transactional(readOnly = true)
+    public Page<ExerciseEntity> getByDisciplineAndGroup(Long disciplineId, Long groupId, int page, int size) {
+        logger.info("Получение занятий по дисциплине {} и группе {} с пагинацией: page={}, size={}",
+                disciplineId, groupId, page, size);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("date").ascending());
+        Page<ExerciseEntity> result = repository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+        logger.info("Найдено {} занятий", result.getContent().size());
+        return result;
+    }
+
 }

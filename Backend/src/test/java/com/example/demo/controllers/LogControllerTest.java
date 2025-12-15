@@ -25,7 +25,7 @@ class LogControllerTest {
     private LogController controller;
 
     @Test
-    void testDownloadLogSuccess() throws Exception {
+    void testDownloadLogSuccess() {
         ByteArrayInputStream stream = new ByteArrayInputStream("log".getBytes());
 
         doNothing().when(logService).uploadLogFileToMinio(anyString(), anyString());
@@ -38,7 +38,7 @@ class LogControllerTest {
     }
 
     @Test
-    void testDownloadLogError() throws Exception {
+    void testDownloadLogError() {
         doThrow(new RuntimeException()).when(logService).uploadLogFileToMinio(anyString(), anyString());
 
         ResponseEntity<InputStreamResource> response = controller.uploadThenDownloadLog();

@@ -10,8 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -203,4 +205,255 @@ class ExerciseRepositoryTest {
         assertEquals(5L, count);
         verify(exerciseRepository).count();
     }
+
+    @Test
+    void testFindByDisciplineIdAndGroupId_WithPagination() {
+        Long disciplineId = 1L;
+        Long groupId = 2L;
+
+        ExerciseEntity e1 = new ExerciseEntity();
+        e1.setId(1L);
+        ExerciseEntity e2 = new ExerciseEntity();
+        e2.setId(2L);
+
+        List<ExerciseEntity> exercises = List.of(e1, e2);
+        Page<ExerciseEntity> pageResult = new PageImpl<>(exercises);
+
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("date").ascending());
+
+        when(exerciseRepository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable))
+                .thenReturn(pageResult);
+
+        Page<ExerciseEntity> result = exerciseRepository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        verify(exerciseRepository).findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+    }
+
+    @Test
+    void testFindByDisciplineIdAndGroupId_WithPagination_DefaultPageable() {
+        Long disciplineId = 1L;
+        Long groupId = 2L;
+
+        ExerciseEntity e1 = new ExerciseEntity();
+        e1.setId(1L);
+        e1.setDescription("Exercise 1");
+
+        ExerciseEntity e2 = new ExerciseEntity();
+        e2.setId(2L);
+        e2.setDescription("Exercise 2");
+
+        ExerciseEntity e3 = new ExerciseEntity();
+        e3.setId(3L);
+        e3.setDescription("Exercise 3");
+
+        List<ExerciseEntity> exercises = List.of(e1, e2, e3);
+        Page<ExerciseEntity> pageResult = new PageImpl<>(
+                exercises,
+                PageRequest.of(0, 10),
+                exercises.size());
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(exerciseRepository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable))
+                .thenReturn(pageResult);
+
+        Page<ExerciseEntity> result = exerciseRepository.findByDisciplineIdAndGroupId(
+                disciplineId, groupId, pageable);
+
+        assertNotNull(result);
+        assertEquals(3, result.getContent().size());
+        assertEquals(3, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(0, result.getNumber());
+        assertEquals(10, result.getSize());
+        assertTrue(result.getContent().stream().anyMatch(e -> e.getId() == 1L));
+        assertTrue(result.getContent().stream().anyMatch(e -> e.getId() == 2L));
+        assertTrue(result.getContent().stream().anyMatch(e -> e.getId() == 3L));
+
+        verify(exerciseRepository).findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+    }
+
+    @Test
+    void testFindByDisciplineIdAndGroupId_WithPagination_SecondPage() {
+        Long disciplineId = 1L;
+        Long groupId = 2L;
+        int pageNumber = 1;
+        int pageSize = 2;
+
+        ExerciseEntity e3 = new ExerciseEntity();
+        e3.setId(3L);
+        e3.setDescription("Exercise 3");
+
+        ExerciseEntity e4 = new ExerciseEntity();
+        e4.setId(4L);
+        e4.setDescription("Exercise 4");
+
+        List<ExerciseEntity> exercises = List.of(e3, e4);
+        Page<ExerciseEntity> pageResult = new PageImpl<>(
+                exercises,
+                PageRequest.of(pageNumber, pageSize),
+                6);
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        when(exerciseRepository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable))
+                .thenReturn(pageResult);
+
+        Page<ExerciseEntity> result = exerciseRepository.findByDisciplineIdAndGroupId(
+                disciplineId, groupId, pageable);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(6, result.getTotalElements());
+        assertEquals(3, result.getTotalPages());
+        assertEquals(pageNumber, result.getNumber());
+        assertEquals(pageSize, result.getSize());
+        assertTrue(result.getContent().stream().anyMatch(e -> e.getId() == 3L));
+        assertTrue(result.getContent().stream().anyMatch(e -> e.getId() == 4L));
+
+        verify(exerciseRepository).findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+    }
+
+    @Test
+    void testFindByDisciplineIdAndGroupId_WithPagination_WithSorting() {
+        Long disciplineId = 1L;
+        Long groupId = 2L;
+
+        LocalDateTime date1 = LocalDateTime.of(2024, 1, 15, 10, 0);
+        LocalDateTime date2 = LocalDateTime.of(2024, 1, 16, 11, 0);
+        LocalDateTime date3 = LocalDateTime.of(2024, 1, 17, 12, 0);
+
+        ExerciseEntity e1 = new ExerciseEntity();
+        e1.setId(1L);
+        e1.setDescription("Exercise 1");
+        e1.setDate(date1);
+
+        ExerciseEntity e2 = new ExerciseEntity();
+        e2.setId(2L);
+        e2.setDescription("Exercise 2");
+        e2.setDate(date2);
+
+        ExerciseEntity e3 = new ExerciseEntity();
+        e3.setId(3L);
+        e3.setDescription("Exercise 3");
+        e3.setDate(date3);
+
+        List<ExerciseEntity> exercises = List.of(e1, e2, e3);
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("date").descending());
+        Page<ExerciseEntity> pageResult = new PageImpl<>(exercises, pageable, exercises.size());
+
+        when(exerciseRepository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable))
+                .thenReturn(pageResult);
+
+        Page<ExerciseEntity> result = exerciseRepository.findByDisciplineIdAndGroupId(
+                disciplineId, groupId, pageable);
+
+        assertNotNull(result);
+        assertEquals(3, result.getContent().size());
+        assertEquals(Sort.by("date").descending(), result.getSort());
+
+        verify(exerciseRepository).findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+    }
+
+    @Test
+    void testFindByDisciplineIdAndGroupId_WithPagination_SingleElement() {
+        Long disciplineId = 1L;
+        Long groupId = 2L;
+
+        ExerciseEntity exercise = new ExerciseEntity();
+        exercise.setId(1L);
+        exercise.setDescription("Single Exercise");
+        exercise.setDate(LocalDateTime.of(2024, 1, 15, 10, 0));
+
+        List<ExerciseEntity> exercises = List.of(exercise);
+        Page<ExerciseEntity> pageResult = new PageImpl<>(exercises);
+        Pageable pageable = PageRequest.of(0, 5);
+
+        when(exerciseRepository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable))
+                .thenReturn(pageResult);
+
+        Page<ExerciseEntity> result = exerciseRepository.findByDisciplineIdAndGroupId(
+                disciplineId, groupId, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContent().size());
+        assertEquals("Single Exercise", result.getContent().get(0).getDescription());
+        assertEquals(1, result.getTotalElements());
+
+        verify(exerciseRepository).findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+    }
+
+    @Test
+    void testFindByDisciplineIdAndGroupId_WithPagination_LargeDataset() {
+        Long disciplineId = 1L;
+        Long groupId = 2L;
+
+        List<ExerciseEntity> exercises = new ArrayList<>();
+        for (int i = 0; i < 15; i++) {
+            ExerciseEntity exercise = new ExerciseEntity();
+            exercise.setId((long) i);
+            exercise.setDescription("Exercise " + i);
+            exercise.setDate(LocalDateTime.of(2024, 1, 15, i, 0));
+            exercises.add(exercise);
+        }
+
+        Pageable pageable = PageRequest.of(2, 5);
+        Page<ExerciseEntity> pageResult = new PageImpl<>(
+                exercises.subList(10, 15),
+                pageable,
+                exercises.size());
+
+        when(exerciseRepository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable))
+                .thenReturn(pageResult);
+
+        Page<ExerciseEntity> result = exerciseRepository.findByDisciplineIdAndGroupId(
+                disciplineId, groupId, pageable);
+
+        assertNotNull(result);
+        assertEquals(5, result.getContent().size());
+        assertEquals(2, result.getNumber());
+        assertEquals(5, result.getSize());
+        assertEquals(15, result.getTotalElements());
+        assertEquals(3, result.getTotalPages());
+
+        verify(exerciseRepository).findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+    }
+
+    @Test
+    void testFindByDisciplineIdAndGroupId_WithPagination_MultipleSorting() {
+        Long disciplineId = 1L;
+        Long groupId = 2L;
+
+        Sort sort = Sort.by(Sort.Order.desc("date"), Sort.Order.asc("id"));
+        Pageable pageable = PageRequest.of(0, 10, sort);
+
+        LocalDateTime date = LocalDateTime.of(2024, 1, 15, 10, 0);
+
+        ExerciseEntity e1 = new ExerciseEntity();
+        e1.setId(1L);
+        e1.setDate(date);
+
+        ExerciseEntity e2 = new ExerciseEntity();
+        e2.setId(2L);
+        e2.setDate(date);
+
+        List<ExerciseEntity> exercises = List.of(e1, e2);
+        Page<ExerciseEntity> pageResult = new PageImpl<>(exercises, pageable, exercises.size());
+
+        when(exerciseRepository.findByDisciplineIdAndGroupId(disciplineId, groupId, pageable))
+                .thenReturn(pageResult);
+
+        Page<ExerciseEntity> result = exerciseRepository.findByDisciplineIdAndGroupId(
+                disciplineId, groupId, pageable);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(sort, result.getSort());
+
+        verify(exerciseRepository).findByDisciplineIdAndGroupId(disciplineId, groupId, pageable);
+    }
+
 }

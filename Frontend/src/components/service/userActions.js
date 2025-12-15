@@ -78,7 +78,10 @@ export const updateUser = async (id, userData) => {
     const response = await api.post(`${BASE_URL}/update/${id}`, userData);
     return response.data;
 };
-
+export const updateAdmin = async (id, userData) => {
+    const response = await api.put(`${BASE_URL}/update/${id}`, userData);
+    return response.data;
+};
 export const deleteUser = async (id) => {
     const response = await api.post(`${BASE_URL}/delete/${id}`);
     return response.data;
