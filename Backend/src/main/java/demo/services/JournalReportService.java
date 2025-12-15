@@ -51,7 +51,6 @@ public class JournalReportService {
                 .stream()
                 .sorted(Comparator.comparing(ExerciseEntity::getDate))
                 .toList();
-        ;
 
         var lessonDates = lessons.stream().map(ExerciseEntity::getDate).toList();
         dto.setLessonDates(lessonDates);

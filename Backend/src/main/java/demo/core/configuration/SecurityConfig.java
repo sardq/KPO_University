@@ -21,12 +21,12 @@ public class SecurityConfig {
 
     private final UserAuthenticationEntryPoint userAuthenticationEntryPoint;
     private final UserAuthenticationProvider userAuthenticationProvider;
-    private final static String adminRole = "ADMIN";
-    private final static String teacherRole = "TEACHER";
-    private final static String disciplineController = "/api/disciplines/**";
-    private final static String groupController = "/api/groups/**";
-    private final static String exerciseController = "/api/exercises/**";
-    private final static String gradeController = "/api/grades/**";
+    private static final String ADMIN_ROLE = "ADMIN";
+    private static final String TEACHER_ROLE = "TEACHER";
+    private static final String DISCIPLINE_CONTROLLER = "/api/disciplines/**";
+    private static final String GROUP_CONTROLLER = "/api/groups/**";
+    private static final String EXERCISE_CONTROLLER = "/api/exercises/**";
+    private static final String GRADE_CONTROLLER = "/api/grades/**";
 
     public SecurityConfig(UserAuthenticationEntryPoint userAuthenticationEntryPoint,
             UserAuthenticationProvider userAuthenticationProvider) {
@@ -50,33 +50,33 @@ public class SecurityConfig {
                                 "/api/otp/**")
                         .permitAll()
                         .requestMatchers("/api/protocol/**")
-                        .hasRole(teacherRole)
+                        .hasRole(TEACHER_ROLE)
                         .requestMatchers(HttpMethod.POST, "/api/users/**")
-                        .hasRole(adminRole)
+                        .hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET,
-                                disciplineController,
-                                groupController,
-                                exerciseController,
-                                gradeController)
-                        .hasAnyRole("STUDENT", teacherRole, adminRole)
+                                DISCIPLINE_CONTROLLER,
+                                GROUP_CONTROLLER,
+                                EXERCISE_CONTROLLER,
+                                GRADE_CONTROLLER)
+                        .hasAnyRole("STUDENT", TEACHER_ROLE, ADMIN_ROLE)
                         .requestMatchers(HttpMethod.POST,
-                                disciplineController,
-                                groupController,
-                                exerciseController,
-                                gradeController)
-                        .hasAnyRole(teacherRole, adminRole)
+                                DISCIPLINE_CONTROLLER,
+                                GROUP_CONTROLLER,
+                                EXERCISE_CONTROLLER,
+                                GRADE_CONTROLLER)
+                        .hasAnyRole(TEACHER_ROLE, ADMIN_ROLE)
                         .requestMatchers(HttpMethod.PUT,
-                                disciplineController,
-                                groupController,
-                                exerciseController,
-                                gradeController)
-                        .hasAnyRole(teacherRole, adminRole)
+                                DISCIPLINE_CONTROLLER,
+                                GROUP_CONTROLLER,
+                                EXERCISE_CONTROLLER,
+                                GRADE_CONTROLLER)
+                        .hasAnyRole(TEACHER_ROLE, ADMIN_ROLE)
                         .requestMatchers(HttpMethod.DELETE,
-                                disciplineController,
-                                groupController,
-                                exerciseController,
-                                gradeController)
-                        .hasAnyRole(teacherRole, adminRole)
+                                DISCIPLINE_CONTROLLER,
+                                GROUP_CONTROLLER,
+                                EXERCISE_CONTROLLER,
+                                GRADE_CONTROLLER)
+                        .hasAnyRole(TEACHER_ROLE, ADMIN_ROLE)
                         .requestMatchers("/api/user/me",
                                 "/api/users/me")
                         .authenticated()

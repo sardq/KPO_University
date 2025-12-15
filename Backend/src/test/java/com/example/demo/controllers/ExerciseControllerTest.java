@@ -440,12 +440,12 @@ class ExerciseControllerTest {
         int defaultPage = 0;
         int defaultSize = 5;
 
-        ExerciseEntity exercise = new ExerciseEntity();
+        exercise = new ExerciseEntity();
         exercise.setId(1L);
         exercise.setDate(LocalDateTime.of(2024, 1, 15, 10, 0));
         exercise.setDescription("Test Exercise");
 
-        ExerciseDto dto = new ExerciseDto();
+        dto = new ExerciseDto();
         dto.setId(1L);
         dto.setDate("2024-01-15T10:00");
         dto.setDescription("Test Exercise");
@@ -495,12 +495,12 @@ class ExerciseControllerTest {
         int page = 0;
         int size = 5;
 
-        ExerciseEntity exercise = new ExerciseEntity();
+        exercise = new ExerciseEntity();
         exercise.setId(1L);
         exercise.setDate(LocalDateTime.now());
         exercise.setDescription("Test");
 
-        ExerciseDto dto = new ExerciseDto();
+        dto = new ExerciseDto();
         dto.setId(1L);
         dto.setDate(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         dto.setDescription("Test");

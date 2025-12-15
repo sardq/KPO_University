@@ -341,7 +341,7 @@ class UserControllerTest {
         UserEntity userEntity = new UserEntity();
         when(mapper.map(userDto, UserEntity.class)).thenReturn(userEntity);
 
-        when(service.update(eq(userId), eq(userEntity)))
+        when(service.update(userId, userEntity))
                 .thenThrow(new RuntimeException("Service error"));
 
         assertThrows(RuntimeException.class, () -> {
