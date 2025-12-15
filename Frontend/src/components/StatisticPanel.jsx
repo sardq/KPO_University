@@ -48,7 +48,6 @@ export default function StatisticsPage() {
         (error) => Promise.reject(error)
     );
 
-    // Загрузка учителя
     useEffect(() => {
         const load = async () => {
             const user = await userActions.getMe();
@@ -61,7 +60,6 @@ export default function StatisticsPage() {
         load();
     }, [navigate]);
 
-    // Загрузка дисциплин учителя
     useEffect(() => {
         if (!teacherId) return;
         const loadDisciplines = async () => {
@@ -71,7 +69,6 @@ export default function StatisticsPage() {
         loadDisciplines();
     }, [teacherId]);
 
-    // Загрузка групп и студентов
     useEffect(() => {
         const loadGroups = async () => {
             if (!disciplineIdGr) {
@@ -132,7 +129,6 @@ export default function StatisticsPage() {
         loadStudentsRp();
     }, [groupIdRp]);
 
-    // Функции получения средних
     const fetchStudentAvg = async () => {
         try {
             const res = await api.get(`/grades/avg/student/${studentId}/${disciplineIdSt}`);
@@ -160,7 +156,6 @@ export default function StatisticsPage() {
         }
     };
 
-    // Отчёт PDF
     const downloadReport = async () => {
         if (!groupIdRp || !disciplineIdRp) {
             alert("Выберите дисциплину и группу");
@@ -234,7 +229,6 @@ export default function StatisticsPage() {
 
                     {tab === "stats" && (
                         <div className="mt-4">
-                            {/* Средний балл студента */}
                             <Card className="bg-secondary text-white p-3 mb-3 shadow">
                                 <h5><i className="bi bi-person-fill me-2"></i>Средний балл студента</h5>
                                 <Form.Select
@@ -264,7 +258,6 @@ export default function StatisticsPage() {
                                 {studentAvg !== null && <p className="fs-4 mt-2">{Number(studentAvg).toFixed(2)}</p>}
                             </Card>
 
-                            {/* Средний балл по дисциплине */}
                             <Card className="bg-secondary text-white p-3 mb-3 shadow">
                                 <h5><i className="bi bi-book-half me-2"></i>Средний балл по дисциплине</h5>
                                 <Form.Select
@@ -282,7 +275,6 @@ export default function StatisticsPage() {
                                 {disciplineAvg !== null && <p className="fs-4 mt-2">{Number(disciplineAvg).toFixed(2)}</p>}
                             </Card>
 
-                            {/* Средний балл группы */}
                             <Card className="bg-secondary text-white p-3 shadow">
                                 <h5><i className="bi bi-people-fill me-2"></i>Средний балл группы по дисциплине</h5>
                                 <Form.Select

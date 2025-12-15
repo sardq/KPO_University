@@ -99,14 +99,10 @@ class ProtocolControllerTest {
 
     @Test
     void getProtocol_WithDifferentId_ShouldUseCorrectFilename() {
-        // Arrange
         Long protocolId = 99999L;
         when(protocolControlService.getProtocol(protocolId)).thenReturn(testPdfBytes);
-
-        // Act
         ResponseEntity<byte[]> response = protocolController.getProtocol(protocolId);
 
-        // Assert
         assertNotNull(response);
         assertTrue(response.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION)
                 .contains("attachment; filename=protocol_99999.pdf"));
@@ -114,15 +110,12 @@ class ProtocolControllerTest {
 
     @Test
     void getProtocol_WithEmptyPdf_ShouldStillReturnOk() {
-        // Arrange
         Long protocolId = 12345L;
         byte[] emptyPdf = new byte[0];
         when(protocolControlService.getProtocol(protocolId)).thenReturn(emptyPdf);
 
-        // Act
         ResponseEntity<byte[]> response = protocolController.getProtocol(protocolId);
 
-        // Assert
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
         assertEquals(0, response.getBody().length);
@@ -130,12 +123,10 @@ class ProtocolControllerTest {
 
     @Test
     void getProtocol_WhenServiceThrowsException_ShouldPropagate() {
-        // Arrange
         Long protocolId = 12345L;
         when(protocolControlService.getProtocol(protocolId))
                 .thenThrow(new RuntimeException("Storage error"));
 
-        // Act & Assert
         assertThrows(RuntimeException.class,
                 () -> protocolController.getProtocol(protocolId));
 
@@ -144,42 +135,29 @@ class ProtocolControllerTest {
 
     @Test
     void constructor_ShouldInitializeService() {
-        // Arrange
         JournalReportControlService mockService = mock(JournalReportControlService.class);
 
-        // Act
         ProtocolController controller = new ProtocolController(mockService);
 
-        // Assert
         assertNotNull(controller);
-        // Можно проверить через рефлексию, что поле установлено
     }
 
     @Test
     void generateProtocol_ShouldLogRequest() {
-        // Arrange
         when(protocolControlService.saveProtocol(any(JournalReportDto.class))).thenReturn(12345L);
 
-        // Act
         ResponseEntity<Long> response = protocolController.generateProtocol(testJournalDto);
 
-        // Assert
         assertNotNull(response);
-        // Логирование проверяется через инструменты типа @Captor или Mockito.verify на
-        // Logger
     }
 
     @Test
     void getProtocol_ShouldLogRequest() {
-        // Arrange
         Long protocolId = 12345L;
         when(protocolControlService.getProtocol(protocolId)).thenReturn(testPdfBytes);
 
-        // Act
         ResponseEntity<byte[]> response = protocolController.getProtocol(protocolId);
 
-        // Assert
         assertNotNull(response);
-        // Логирование проверяется через инструменты типа @Captor
     }
 }

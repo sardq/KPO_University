@@ -80,11 +80,10 @@ const StudentJournal = () => {
       EXERCISES_PER_PAGE
     );
     console.log(data);
-    // Если нет занятий
     if (!data || !Array.isArray(data.content) || data.totalElements === 0) {
       setExercises([]);
-      setCurrentPage(1); // ставим 1, чтобы пагинация не ломалась
-      setTotalPages(1);   // хотя страниц нет, показываем 1, чтобы интерфейс был стабильным
+      setCurrentPage(1); 
+      setTotalPages(1);  
       setTotalElements(0);
       setGrades([]);
       return;

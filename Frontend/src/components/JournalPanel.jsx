@@ -37,12 +37,10 @@ const JournalPanel = () => {
   const [editingGradeId, setEditingGradeId] = useState(null);
   const [showGradeModal, setShowGradeModal] = useState(false);
 
-  // Пагинация занятий
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalExercises, setTotalExercises] = useState(0);
 
-  // Загрузка текущего пользователя (учителя)
   useEffect(() => {
     const load = async () => {
       const user = await userActions.getMe();
@@ -55,7 +53,6 @@ const JournalPanel = () => {
     load();
   }, [navigate]);
 
-  // Загрузка дисциплин учителя
   useEffect(() => {
     if (role !== "TEACHER") navigate("/teacherHome");
     const loadDisciplines = async () => {
@@ -67,7 +64,6 @@ const JournalPanel = () => {
     loadDisciplines();
   }, [role, navigate, teacherId]);
 
-  // Загрузка групп по выбранной дисциплине
   useEffect(() => {
     if (!selectedDiscipline) {
       setGroups([]);
@@ -86,7 +82,6 @@ const JournalPanel = () => {
     loadGroups();
   }, [selectedDiscipline]);
 
-  // Загрузка студентов и оценок
   useEffect(() => {
     if (!selectedGroup || !selectedDiscipline) {
       setStudents([]);
@@ -109,7 +104,6 @@ const JournalPanel = () => {
     loadExercisesPage(1);
   }, [selectedGroup, selectedDiscipline]);
 
-  // Загрузка заданной страницы занятий
   const loadExercisesPage = async (page = 1) => {
     if (!selectedDiscipline || !selectedGroup) return;
 
@@ -130,7 +124,6 @@ const JournalPanel = () => {
     }
   };
 
-  // Пагинация
   const paginationActions = {
     firstPage: () => loadExercisesPage(1),
     prevPage: () => loadExercisesPage(Math.max(currentPage - 1, 1)),
@@ -141,7 +134,6 @@ const JournalPanel = () => {
   const isFirstPage = currentPage === 1;
   const isLastPage = currentPage === totalPages;
 
-  // Создание/редактирование занятия
   const handleCreateExercise = () => {
     setCurrentExercise(null);
     setExerciseForm({ date: "", description: "" });
@@ -304,7 +296,6 @@ const JournalPanel = () => {
                 </tbody>
               </Table>
 
-              {/* Пагинация */}
               {exercises.length > 0 && totalPages > 0 ? (
               <div className="d-flex justify-content-between align-items-center mt-2">
                 <ButtonGroup size="sm">
@@ -335,7 +326,6 @@ const JournalPanel = () => {
         </Card.Body>
       </Card>
 
-      {/* Модальное окно создания/редактирования занятия */}
       <Modal className="text-white" show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{currentExercise ? "Редактировать занятие" : "Создать занятие"}</Modal.Title>
@@ -371,7 +361,6 @@ const JournalPanel = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Модальное окно выставления/редактирования оценки */}
       <Modal className="text-white" show={showGradeModal} onHide={() => setShowGradeModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{editingGradeId ? "Редактирование оценки" : "Выставить оценку"}</Modal.Title>

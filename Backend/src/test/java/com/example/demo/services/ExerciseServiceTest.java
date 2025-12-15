@@ -517,11 +517,11 @@ class ExerciseServiceTest {
 
         ExerciseEntity exercise1 = new ExerciseEntity();
         exercise1.setId(1L);
-        exercise1.setDate(LocalDateTime.of(2024, 3, 15, 10, 0)); // Более поздняя дата
+        exercise1.setDate(LocalDateTime.of(2024, 3, 15, 10, 0)); 
 
         ExerciseEntity exercise2 = new ExerciseEntity();
         exercise2.setId(2L);
-        exercise2.setDate(LocalDateTime.of(2024, 1, 15, 10, 0)); // Более ранняя дата
+        exercise2.setDate(LocalDateTime.of(2024, 1, 15, 10, 0)); 
 
         List<ExerciseEntity> exercises = List.of(exercise1, exercise2);
         Page<ExerciseEntity> expectedPage = new PageImpl<>(exercises);

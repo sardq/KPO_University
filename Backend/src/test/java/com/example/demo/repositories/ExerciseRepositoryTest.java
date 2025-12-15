@@ -427,7 +427,6 @@ class ExerciseRepositoryTest {
         Long disciplineId = 1L;
         Long groupId = 2L;
 
-        // Сложная сортировка: сначала по дате по убыванию, затем по id по возрастанию
         Sort sort = Sort.by(Sort.Order.desc("date"), Sort.Order.asc("id"));
         Pageable pageable = PageRequest.of(0, 10, sort);
 
